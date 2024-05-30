@@ -1,0 +1,16 @@
+id: 318674249                                                                                                   # Required
+donor: 591C                                                                                                     # Required
+seq_run: 003                                                                                                    # Required
+output_destination: Default                                                                                     # Default: project_name/Output_Files 
+aligner_software_path: Default                                                                                  # Default: whatever when using module load into the path file
+alignment_ref_genome_file: Default                                                                              # Default: refdata-gex-GRCh38-2020-A
+alignment_ref_vdj_file: Default                                                                                 # Default:
+alignment_ref_genome_path: Default                                                                              # Default: /home/labs/nyosef/yoavnah/CellRangerIDE/const_files/transcriptome 
+weizmann_user: yoavnah                                                                                          # Required
+s3_access_file:                                                                                                 # Required
+project_name: nir                                                                                               # Required
+Sample_sheet_address:                                                                                           # Required
+shell_file: Default                                                                                             # Default: /home/labs/nyosef/yoavnah/CellRangerIDE/Projects/yoav/OutputFiles/{donor}_{seq_run}_run.sh
+python_env_version: immune_aging.py_env.v4                                                                      # Ignore 
+r_env_version: immune_aging.r_env.v1                                                                            # Ignore
+r_setup_version: immune_aging.R_setup.v2                                                                        # Ignore

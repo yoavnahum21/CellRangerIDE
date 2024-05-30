@@ -1,0 +1,9 @@
+[gene-expression]
+reference
+expect-cells
+
+[libraries]
+fastq_id,fastqs,lanes,physical_library_id,feature_types,subsample_rate
+
+[samples]
+sample_id,cmo_ids,description
