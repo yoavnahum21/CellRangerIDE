@@ -2,7 +2,7 @@ from pipeline import pipeline
 from _utils import PROGRAM_PATH
 import pandas as pd
 import os 
-
+import csv
 
 def which_pipeline(pipeline_num) -> None:
     
@@ -23,9 +23,6 @@ def which_pipeline(pipeline_num) -> None:
     return None
 
 
-# csv_address = ("/home/labs/nyosef/yoavnah/CellRangerIDE/Projects/yoav/File_Path/CSV/program.csv")
-# csv_file = pd.read_csv(csv_address)
-
 my_pipe = pipeline()
 print("Which pipeline would you like to use??\n 1) Mkfastq\n 2) Multiplexing\n 3) Count\n 4) Demultiplexing\n 5) Run the wholllllleeee pipeline with a basic example\n 6) End task")
 pipe = input()
@@ -35,4 +32,4 @@ while pipe != '6':
     pipe = input()
     which_pipeline(pipe)
     
-print("Ciao")
+print("Ciao!")

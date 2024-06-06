@@ -1,15 +1,14 @@
 import os
 import pathlib
 BASE_PATH = "/home/labs/nyosef/yoavnah/CellRangerIDE/"
+import yaml
 
 # Project building folders
+CONST_PATH = os.path.join(BASE_PATH,"const_files")
+CONFIG_PATH = os.path.join(CONST_PATH, "config.yml")
+with open(CONFIG_PATH,'r') as f:
+    config = yaml.safe_load(f)
 
-CONFIG_PATH = os.path.join(BASE_PATH, "const_files/config")
-config_cc = open(CONFIG_PATH).readlines()
-config_cc = [row.split(":") for row in config_cc]
-keys = [row[0] for row in config_cc]
-values = [row[1].split(" ")[1] for row in config_cc]
-config = {keys[i]:values[i] for i in range(len(config_cc))}
 project_name = config['project_name']
 PROJECT_PATH = os.path.join(BASE_PATH, "Projects")
 PROJECT_NAME_PATH = os.path.join(PROJECT_PATH, project_name)
@@ -37,10 +36,11 @@ basic_run_path = os.path.join(OUTPUT_PATH, "basic_run.sh")
 # csv format executing file
 
 PROGRAM_PATH = os.path.join(BASE_PATH, "program.csv")
-MULTI_TEMPLATE_CSV_PATH = os.path.join(CSV_PATH, "multi_template.csv")
+MULTI_TEMPLATE_CSV_PATH = os.path.join(CONST_PATH, "multi_template.csv")
+MULTI_CSV_PATH = os.path.join(CSV_PATH, "multi.csv")
 
 # References
-REFERENCE_PATH = os.path.join(BASE_PATH, "const_files/transcriptome")
+REFERENCE_PATH = os.path.join(CONST_PATH, "transcriptome")
 gex_reference_path = os.path.join(REFERENCE_PATH, "refdata-gex-GRCh38-2020-A")
 vdj_reference_path = os.path.join(REFERENCE_PATH, "refdata-cellranger-vdj-GRCh38-alts-ensembl-5.0.0")
 

@@ -3,6 +3,7 @@ import os
 import shutil
 import subprocess
 import pandas as pd
+import csv
 
 MEM_PER_TASK = 70
 CPUS_PER_TASK = 4
@@ -53,15 +54,24 @@ class pipeline:
         if self.aligner_ref_vdj_path == "Default":
             self.aligner_ref_vdj_path = vdj_reference_path
 
-        self.user = ['weizmann_user']
+        self.user = config['weizmann_user']
 
         self.shell_file = config['shell_file']
         if self.shell_file == "Default":
-            self.shell_file = OUTPUT_PATH + self.id + "_cellrangerpipe.sh"
+            self.shell_file = OUTPUT_PATH + str(self.id) + "_cellrangerpipe.sh"
         
         self.Sample_sheet_address = config['Sample_sheet_address']
+        
+        self.fastq_folders_name = config['fastq_folders_name']
 
-        self.multi_csv = pd.read_csv(MULTI_TEMPLATE_CSV_PATH)
+        self.fastq_path = config['fastq_path']
+
+        self.lanes_used = config['lanes_used']
+
+        self.feature_type = config['feature_type']
+
+        self.multi_csv = pd.DataFrame(columns=['[gene-expression]',None, None, None])
+
         
     
     def __str__(self) -> str:
@@ -275,6 +285,33 @@ OPTIONS:
         --nopreflight           Skip preflight checks
 
         '''
+
+        # Here we create a compatible csv file for the multi pipeline.
+        if len(config['fastq_path']) == 0 or len(config['fastq_path']) != len(config['fastq_folders_name']) or len(config['feature_type'])  != len(config['fastq_folders_name']): # None parameters should be entered as condition as well
+            print("Your config is not valid!, plz try again later")
+            return
+        col = ['[gene-expression]',None, None, None]
+        self.multi_csv.loc[0] = ['[gene-expression]',None, None, None]
+        self.multi_csv.loc[1] = ['reference',None, None, None]
+        row_reference_index = self.multi_csv[self.multi_csv.iloc[:, 0] == 'reference'].index[0]
+        self.multi_csv.iloc[row_reference_index, 1] = self.aligner_ref_genome_path
+        self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([[None, None, None, None]], columns=col)], ignore_index=True)
+        self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([['[libraries]', None, None, None]], columns=col)], ignore_index=True)
+        variable_libraries_names = ['fastq_id', 'fastqs', 'lanes', 'feature_types']
+        variable_libraries_lists = list(zip(self.fastq_folders_name, self.fastq_path, self.lanes_used, self.feature_type))
+        self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([variable_libraries_names], columns=col)], ignore_index=True)
+        library_data_df = pd.DataFrame(variable_libraries_lists, columns=col)
+        self.multi_csv = pd.concat([self.multi_csv, library_data_df], ignore_index=True)
+        self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([[None, None, None, None]], columns=col)], ignore_index=True)
+        self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([['[samples]', None, None, None]], columns=col)], ignore_index=True)
+        variable_samples_names = ['sample_id', 'cmo_ids', 'description', None]
+        variable_samples_list  = list(zip(self.fastq_folders_name,[None, None, None], [None, None, None], [None, None, None]))
+        self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([variable_samples_names], columns=col)], ignore_index=True)
+        samples_data_df = pd.DataFrame(variable_samples_list, columns=col)
+        self.multi_csv = pd.concat([self.multi_csv, samples_data_df], ignore_index=True)
+        self.multi_csv.to_csv(MULTI_CSV_PATH, header=False, index=False)
+        
+
         with open(make_multi_path, "w") as f:
             f.write(
             f"""#!/usr/bin/bash
@@ -285,7 +322,7 @@ OPTIONS:
     # SBATCH --mem={''}G
     # SBATCH --cpus-per-task={''}
 
-    cellranger multi --id={self.id} --csv={} --maxjobs={''} --localcores={''} --localmem={''}
+    cellranger multi --id={self.id} --csv={MULTI_CSV_PATH} --maxjobs={MAX_JOBS} --localcores={CPUS_PER_TASK} --localmem={MEM_PER_TASK}
             """
             )
     
