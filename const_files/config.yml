@@ -1,68 +1,65 @@
 # This is the configuration file to run the cellranger pipeline on the Weizmann cluster/ AWS S3. 
 
 # Required:
-id: 318674249
+project_name: 
 
 # Required:
-donor: 591C                                                                                                     
+id: 
 
-# Required:
-seq_run: 003                                                                                                    
+# Optional:
+donor:                                                                                                      
+
+# Optional:
+seq_run:                                                                                                     
+
+# Required for count pipeline: (usually named after the prefix in the fastqs files)
+sample_name: 
 
 # Default: project_name/Output_Files
-output_destination: Default                                                                                     
+output_destination:                                                                                      
 
 # Default: whatever when using module load into the path file
-aligner_software_path: Default                                                                                  
+aligner_software_path:                                                                                   
 
-# Default: refdata-gex-GRCh38-2020-A
-alignment_ref_genome_file: Default                                                                              
+# Default: refdata-gex-mm10-2020-A
+alignment_ref_genome_file:                                                                               
 
 # Default:
-alignment_ref_vdj_file: Default                                                                                 
+alignment_ref_vdj_file:                                                                                  
 
 # Default: /home/labs/nyosef/yoavnah/CellRangerIDE/const_files/transcriptome
-alignment_ref_genome_path: Default                                                                              
+alignment_ref_genome_path:                                                                               
 
 # Required:
-weizmann_user: yoavnah                                                                                          
+weizmann_user:                                                                                           
 
 # Optional: if you are not using AWS S3 this one is not necessary
-s3_access_file:                                                                                                 
-
-# Required:
-project_name: nir                                                                                               
+s3_access_file:                                                                                                                                                                                     
 
 # Required:
 Sample_sheet_address:                                                                                           
 
 # Default: /home/labs/nyosef/yoavnah/CellRangerIDE/Projects/yoav/OutputFiles/{donor}_{seq_run}_run.sh
-shell_file: Default                                                                                             
+shell_file:                                                                                              
 
-# Ignore:
-python_env_version: immune_aging.py_env.v4                                                                      
-
-# Ignore:
-r_env_version: immune_aging.r_env.v1                                                                           
-
-# Ignore:
-r_setup_version: immune_aging.R_setup.v2                                                                        
+# Required: Choose between 'feature_barcode' or 'cmo_barcode'
+multiplexing_method: 
 
 # Required:
 fastq_path: 
-  - /home/labs/nyosef/yoavnah/NovaSeqX-B/Fastqs/li/lireich/20240515_LH00211_0021_B2233L7LT1/FastQC/B16_GEX #Add the path to the fastq files here 
-  - /home/labs/nyosef/yoavnah/NovaSeqX-B/Fastqs/li/lireich/20240515_LH00211_0021_B2233L7LT1/FastQC/B16_HASH #Add the path to the fastq files here
+  - 
+  - 
 
 # Required:
 fastq_folders_name:
-  - B16_GEX #Add the name of the folder respectively to the fastq_path here 
-  - B16_HASH #Add the name of the folder respectively to the fastq_path here
+  - #Add the name of the folder respectively to the fastq_path here 
+  - #Add the name of the folder respectively to the fastq_path here
 
 # Default: any
 lanes_used:
-  - any #Add the lanes used for the fastq files here
-  - any #Add the lanes used for the fastq files here
-  - any #Add the lanes used for the fastq files here
+  - #Add the lanes used for the fastq files here
+  - #Add the lanes used for the fastq files here
+  - #Add the lanes used for the fastq files here
 
 # Optional:
 physical_library_id:
@@ -72,11 +69,57 @@ physical_library_id:
 
 # Required:
 feature_type:
-  - gene expression #Add the feature type here
-  - gene expression #Add the feature type here
+  - #Add the feature type here
+  - #Add the feature type here
 
 # Optional:
 subsample_rate:
   - #Add the subsample rate here
   - #Add the subsample rate here
   - #Add the subsample rate here
+
+
+# Optional: only if you are using the feature_reference
+feature_reference_csv:  #/home/labs/nyosef/yoavnah/CellRangerIDE/const_files/Shlomit_weeks_HTO_ref.csvHTO_feature_type
+
+# Required: (if feature_reference_csv wasn't given)
+hto_id:
+  - #Add hashing ID 
+  - #Add hashing ID 
+  - #Add hashing ID 
+  - #Add hashing ID
+
+# Default: hto_names = hto_id 
+hto_names:
+  - 
+  - 
+  - 
+  - 
+
+# Default: 'R2' 
+hto_read:
+  - 
+  - 
+  - 
+  - 
+
+# Default: '5PNNNNNNNNNN(BC)' 
+hto_pattern:
+  - 
+  -
+  -
+  -
+
+# Required 
+hto_sequence:
+  - 
+  - 
+  - 
+  - 
+
+# Default: Antibody Capture 
+HTO_feature_type:
+  - 
+  -
+  -
+  -

@@ -2,8 +2,11 @@ from _utils import *
 import os
 import shutil
 import subprocess
+import hashsolo
 import pandas as pd
-import csv
+import numpy as np
+import scanpy as sc
+import anndata as ad
 
 MEM_PER_TASK = 70
 CPUS_PER_TASK = 4
@@ -22,6 +25,7 @@ class pipeline:
             os.makedirs(BCL_PATH)
             os.makedirs(CSV_PATH)
             os.makedirs(FASTQ_PATH)
+            os.makedirs(FASTQC_PATH)
             os.makedirs(H5_PATH)
             os.makedirs(H5ADS_PATH)
             os.makedirs(BEFORE_DEMULTI_H5ADS_PATH)
@@ -38,26 +42,26 @@ class pipeline:
         self.id = config['id']
 
         self.output_destination = config['output_destination']
-        if self.output_destination == "Default":
+        if self.output_destination == None:
             self.output_destinatxion = OUTPUT_PATH
         
         
         self.aligner_software_path = config['aligner_software_path']
-        if self.aligner_software_path == "Default":
-            self.aligner_software_path = "cellranger"
+        if self.aligner_software_path == None:
+            self.aligner_software_path = "/apps/RH7U2/general/cellranger/7.1.0/cellranger"
 
         self.aligner_ref_genome_path = config['alignment_ref_genome_file']
-        if self.aligner_ref_genome_path == "Default":
+        if self.aligner_ref_genome_path == None:
             self.aligner_ref_genome_path = gex_reference_path
 
         self.aligner_ref_vdj_path = config['alignment_ref_vdj_file']
-        if self.aligner_ref_vdj_path == "Default":
+        if self.aligner_ref_vdj_path == None:
             self.aligner_ref_vdj_path = vdj_reference_path
 
         self.user = config['weizmann_user']
 
         self.shell_file = config['shell_file']
-        if self.shell_file == "Default":
+        if self.shell_file == None:
             self.shell_file = OUTPUT_PATH + str(self.id) + "_cellrangerpipe.sh"
         
         self.Sample_sheet_address = config['Sample_sheet_address']
@@ -70,7 +74,29 @@ class pipeline:
 
         self.feature_type = config['feature_type']
 
-        self.multi_csv = pd.DataFrame(columns=['[gene-expression]',None, None, None])
+        self.multi_csv = None
+        
+        self.multiplexing_method = config['multiplexing_method']
+        if ((self.multiplexing_method != 'feature_barcode') and (self.multiplexing_method != 'cmo_barcode') and (self.multiplexing_method != None)):
+            print("Your multiplexing method isn't valid")
+            exit(1)
+
+        self.feature_ref_csv = config["feature_reference_csv"]
+        if self.feature_ref_csv == None:
+            self.hto_id = config["hto_id"]
+            self.hto_names = config["hto_names"]
+            if self.hto_names[0] == None:
+                self.hto_names = self.hto_id
+            self.hto_read = config["hto_read"]
+            if self.hto_read[0] == None:
+                self.hto_read = ['R2'] * len(self.hto_read)
+            self.hto_pattern = config["hto_pattern"]
+            if self.hto_pattern[0] == None:
+                self.hto_pattern = ['5PNNNNNNNNNN(BC)'] * len(self.hto_pattern)
+            self.hto_sequence = config["hto_sequence"]
+            self.HTO_feature_type = config["HTO_feature_type"]
+            if self.HTO_feature_type[0] == None:
+                self.HTO_feature_type = ['Antibody Capture'] * len(self.HTO_feature_type)
 
         
     
@@ -253,7 +279,8 @@ Optional:
             )
 
 
-
+    def make_samplesheet(self):
+        pass
 
 
     def multiplex(self):
@@ -264,12 +291,12 @@ Analyze multiplexed data or combined gene expression/immune profiling/feature ba
 
 USAGE:
     cellranger multi [OPTIONS] --id <ID> --csv <CSV>
-
 OPTIONS:
         --id <ID>               A unique run id and output folder name [a-zA-Z0-9_-]+
         --description <TEXT>    Sample description to embed in output files [default: ]
         --csv <CSV>             Path of CSV file enumerating input libraries and analysis parameters
         --dry                   Do not execute the pipeline. Generate a pipeline invocation (.mro) file and stop
+
         --jobmode <MODE>        Job manager to use. Valid options: local (default), sge, lsf, slurm or path to a .template file. Search for help on "Cluster Mode" at support.10xgenomics.com for more details on configuring the pipeline to use a compute
                                 cluster [default: local]
         --localcores <NUM>      Set max cores the pipeline may request at one time. Only applies to local jobs
@@ -290,11 +317,12 @@ OPTIONS:
         if len(config['fastq_path']) == 0 or len(config['fastq_path']) != len(config['fastq_folders_name']) or len(config['feature_type'])  != len(config['fastq_folders_name']): # None parameters should be entered as condition as well
             print("Your config is not valid!, plz try again later")
             return
+        self.multi_csv = pd.DataFrame(columns=['[gene-expression]',None, None, None])
         col = ['[gene-expression]',None, None, None]
-        self.multi_csv.loc[0] = ['[gene-expression]',None, None, None]
-        self.multi_csv.loc[1] = ['reference',None, None, None]
+        self.multi_csv.loc[0] = ['reference',None, None, None]
         row_reference_index = self.multi_csv[self.multi_csv.iloc[:, 0] == 'reference'].index[0]
         self.multi_csv.iloc[row_reference_index, 1] = self.aligner_ref_genome_path
+        self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([[None, None, None, None]], columns=col)], ignore_index=True)
         self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([[None, None, None, None]], columns=col)], ignore_index=True)
         self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([['[libraries]', None, None, None]], columns=col)], ignore_index=True)
         variable_libraries_names = ['fastq_id', 'fastqs', 'lanes', 'feature_types']
@@ -303,16 +331,30 @@ OPTIONS:
         library_data_df = pd.DataFrame(variable_libraries_lists, columns=col)
         self.multi_csv = pd.concat([self.multi_csv, library_data_df], ignore_index=True)
         self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([[None, None, None, None]], columns=col)], ignore_index=True)
-        self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([['[samples]', None, None, None]], columns=col)], ignore_index=True)
-        variable_samples_names = ['sample_id', 'cmo_ids', 'description', None]
-        variable_samples_list  = list(zip(self.fastq_folders_name,[None, None, None], [None, None, None], [None, None, None]))
-        self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([variable_samples_names], columns=col)], ignore_index=True)
-        samples_data_df = pd.DataFrame(variable_samples_list, columns=col)
-        self.multi_csv = pd.concat([self.multi_csv, samples_data_df], ignore_index=True)
-        self.multi_csv.to_csv(MULTI_CSV_PATH, header=False, index=False)
-        
+        self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([[None, None, None, None]], columns=col)], ignore_index=True)
+        if (self.multiplexing_method == 'cmo_barcode'):
+            self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([['[samples]', None, None, None]], columns=col)], ignore_index=True)
+            variable_samples_names = ['sample_id', 'cmo_ids', 'description', None]
+            variable_samples_list  = list(zip(self.fastq_folders_name,[None, None, None, None], [None, None, None, None], [None, None, None, None]))
+            self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([variable_samples_names], columns=col)], ignore_index=True)
+            samples_data_df = pd.DataFrame(variable_samples_list, columns=col)
+            self.multi_csv = pd.concat([self.multi_csv, samples_data_df], ignore_index=True)
+            self.multi_csv.to_csv(MULTI_CSV_PATH, header=False, index=False)
+        elif (self.multiplexing_method == 'feature_barcode'):
+            self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([['[feature]', None, None, None]], columns=col)], ignore_index=True)
+            if(self.feature_ref_csv != "Default"):
+                self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([['reference', self.feature_ref_csv, None, None]], columns=col)], ignore_index=True)
+            else:
+                sample_sheet = pd.DataFrame([self.hto_id,self.hto_names,self.hto_read,self.hto_pattern,self.hto_sequence,self.HTO_feature_type]).transpose()
+                sample_sheet.columns = ['id','name','read','pattern','sequence','feature_type']
+                sample_sheet.to_csv(feature_reference_path, index=False)
+                self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([['reference', feature_reference_path, None, None]], columns=col)], ignore_index=True)
+        else:
+            print("you chose wrong multiplexing method")
+            return
+        self.multi_csv.to_csv(MULTI_CSV_PATH, index=False)
 
-        with open(make_multi_path, "w") as f:
+        with open(make_multi_path, "w+") as f:
             f.write(
             f"""#!/usr/bin/bash
 
@@ -322,30 +364,27 @@ OPTIONS:
     # SBATCH --mem={''}G
     # SBATCH --cpus-per-task={''}
 
-    cellranger multi --id={self.id} --csv={MULTI_CSV_PATH} --maxjobs={MAX_JOBS} --localcores={CPUS_PER_TASK} --localmem={MEM_PER_TASK}
+    {self.aligner_software_path} multi --id={self.id} --csv={MULTI_CSV_PATH} --maxjobs={MAX_JOBS} --localcores={CPUS_PER_TASK} --localmem={MEM_PER_TASK}
+    mv {self.id} {H5_PATH}
+    mv {make_multi_path} {H5_PATH}
             """
             )
     
-    def demultiplex(self):
+    # def demultiplex(self, sample: str, adata: ad.AnnData, plot: bool = True):
+    def demultiplex(self):    
+        adata = sc.read_10x_h5(os.path.join(H5_PATH, "sample_filtered_feature_bc_matrix.h5"), gex_only=False)
+        sample = "B16"
+        adata = hashsolo.demultiplex(sample,adata,plot=False)
+        adata.var[GENE_SYMBOLS_KEY] = adata.var.index
+        adata.var.set_index(GENE_IDS_KEY, inplace=True)
 
-        '''
-        --id <ID>               A unique run id and output folder name [a-zA-Z0-9_-]+
-        --description <TEXT>    Sample description to embed in output files [default: ]
-        --csv <CSV>             Path of CSV file enumerating 'cellranger count/vdj/multi' outputs
-        --normalize <MODE>      Library depth normalization mode [default: mapped] [possible values: mapped, none]
-        --nosecondary           Disable secondary analysis, e.g. clustering
-        --dry                   Do not execute the pipeline. Generate a pipeline invocation (.mro) file and stop
-        --jobmode <MODE>        Job manager to use. Valid options: local (default), sge, lsf, slurm or path to a .template file. Search for help on "Cluster Mode" at support.10xgenomics.com for more details on configuring the pipeline to use a compute
-                                cluster [default: local]
-        --localcores <NUM>      Set max cores the pipeline may request at one time. Only applies to local jobs
-        --localmem <NUM>        Set max GB the pipeline may request at one time. Only applies to local jobs
-        --localvmem <NUM>       Set max virtual address space in GB for the pipeline. Only applies to local jobs
-        --mempercore <NUM>      Reserve enough threads for each job to ensure enough memory will be available, assuming each core on your cluster has at least this much memory available. Only applies to cluster jobmodes
-        --maxjobs <NUM>         Set max jobs submitted to cluster at one time. Only applies to cluster jobmodes
-        --jobinterval <NUM>     Set delay between submitting jobs to cluster, in ms. Only applies to cluster jobmodes
-        --overrides <PATH>      The path to a JSON file that specifies stage-level overrides for cores and memory. Finer-grained than --localcores, --mempercore and --localmem. Consult https://support.10xgenomics.com/ for an example override file
-        '''
-        pass
+        adata.obs[SAMPLE_ID_KEY] = sample
+        adata.obs.index = adata.obs.index + "-" + adata.obs[SAMPLE_ID_KEY]
+
+        adata_path = os.path.join(H5ADS_PATH, f"{sample}.h5ad")
+        adata.write(adata_path)
+
+        
 
     def reanalayze(self):
         '''
@@ -383,12 +422,63 @@ OPTIONS:
         --noexit                       Keep web UI running after pipestance completes or fails
         --nopreflight                  Skip preflight checks
         '''
+        with open(make_multi_path, "w") as f:
+            f.write(
+            f"""#!/usr/bin/bash
+
+    # SBATCH --job-name={''}
+    # SBATCH --output={''}
+    # SBATCH --partition={''}
+    # SBATCH --mem={''}G
+    # SBATCH --cpus-per-task={''}
+
+    cellranger multi --id={self.id} --csv={MULTI_CSV_PATH} --maxjobs={MAX_JOBS} --localcores={CPUS_PER_TASK} --localmem={MEM_PER_TASK}
+            """
+            )
+
+    def multi_with_5prime(self):
         pass
 
+    def aggregate(self):
+        '''
+        cellranger-aggr 
+Aggregate data from multiple Cell Ranger runs
 
+USAGE:
+    cellranger aggr [OPTIONS] --id <ID> --csv <CSV>
+
+OPTIONS:
+        --id <ID>               A unique run id and output folder name [a-zA-Z0-9_-]+
+        --description <TEXT>    Sample description to embed in output files [default: ]
+        --csv <CSV>             Path of CSV file enumerating 'cellranger count/vdj/multi' outputs
+        --normalize <MODE>      Library depth normalization mode [default: mapped] [possible values: mapped, none]
+        --dry                   Do not execute the pipeline. Generate a pipeline invocation (.mro) file and stop
+        --nosecondary           Disable secondary analysis, e.g. clustering
+        --jobmode <MODE>        Job manager to use. Valid options: local (default), sge, lsf, slurm or path to a .template file. Search for help on "Cluster Mode" at support.10xgenomics.com for more
+                                details on configuring the pipeline to use a compute cluster [default: local]
+        --localcores <NUM>      Set max cores the pipeline may request at one time. Only applies to local jobs
+        --localmem <NUM>        Set max GB the pipeline may request at one time. Only applies to local jobs
+        --localvmem <NUM>       Set max virtual address space in GB for the pipeline. Only applies to local jobs
+        --mempercore <NUM>      Reserve enough threads for each job to ensure enough memory will be available, assuming each core on your cluster has at least this much memory available. Only applies to
+                                cluster jobmodes
+        --maxjobs <NUM>         Set max jobs submitted to cluster at one time. Only applies to cluster jobmodes
+        --jobinterval <NUM>     Set delay between submitting jobs to cluster, in ms. Only applies to cluster jobmodes
+        --overrides <PATH>      The path to a JSON file that specifies stage-level overrides for cores and memory. Finer-grained than --localcores, --mempercore and --localmem. Consult
+                                https://support.10xgenomics.com/ for an example override file
+        --uiport <PORT>         Serve web UI at http://localhost:PORT
+        --disable-ui            Do not serve the web UI
+        --noexit                Keep web UI running after pipestance completes or fails
+        --nopreflight           Skip preflight checks
+    -h, --help                  Print help information
+        '''
+        pass
 
     def make_anndatas(self):
         pass
+
+    def make_custom_reference(self):
+        pass
+
     
     def run_basic_pipeline(self):
         with open(self.shell_file, "w") as f:

@@ -1,7 +1,9 @@
 import os
 import pathlib
-BASE_PATH = "/home/labs/nyosef/yoavnah/CellRangerIDE/"
 import yaml
+
+BASE_PATH = "/home/labs/nyosef/yoavnah/CellRangerIDE/"
+REFERENCE_PATH = "/shareDB/CellRanger/"
 
 # Project building folders
 CONST_PATH = os.path.join(BASE_PATH,"const_files")
@@ -17,6 +19,7 @@ QC_PATH = os.path.join(FILE_PATH, "10x_QC")
 BCL_PATH = os.path.join(FILE_PATH, "BCL")
 CSV_PATH = os.path.join(FILE_PATH, "CSV")
 FASTQ_PATH = os.path.join(FILE_PATH, "Fastqs")
+FASTQC_PATH = os.path.join(FASTQ_PATH, "fastqc")
 H5_PATH = os.path.join(FILE_PATH, "h5")
 H5ADS_PATH = os.path.join(FILE_PATH, "h5ads")
 DEMULTIPLEXED_H5ADS_PATH = os.path.join(H5ADS_PATH, "demultiplexed")
@@ -32,20 +35,21 @@ make_h5_path = os.path.join(OUTPUT_PATH, "make_h5.sh")
 make_h5ads_path = os.path.join(OUTPUT_PATH, "make_h5ads.sh")
 demulti_path = os.path.join(OUTPUT_PATH, "demulti.sh")
 basic_run_path = os.path.join(OUTPUT_PATH, "basic_run.sh")
+samplesheet_path = os.path.join(CSV_PATH,"samplesheet.csv")
+feature_reference_path = os.path.join(CSV_PATH,"feature_reference.csv")
 
 # csv format executing file
 
-PROGRAM_PATH = os.path.join(BASE_PATH, "program.csv")
 MULTI_TEMPLATE_CSV_PATH = os.path.join(CONST_PATH, "multi_template.csv")
 MULTI_CSV_PATH = os.path.join(CSV_PATH, "multi.csv")
 
 # References
-REFERENCE_PATH = os.path.join(CONST_PATH, "transcriptome")
-gex_reference_path = os.path.join(REFERENCE_PATH, "refdata-gex-GRCh38-2020-A")
-vdj_reference_path = os.path.join(REFERENCE_PATH, "refdata-cellranger-vdj-GRCh38-alts-ensembl-5.0.0")
+gex_reference_path = os.path.join(REFERENCE_PATH, "refdata-gex-mm10-2020-A")
+vdj_reference_path = os.path.join(REFERENCE_PATH, "refdata-cellranger-vdj-GRCh38-alts-ensembl-7.1.0")
 
 # keys
 GENE_SYMBOLS_KEY = "gene_symbols"
+GEX_KEY = "Gene Expression"
 GENE_IDS_KEY = "gene_ids"
 FEATURE_TYPE_KEY = "feature_types"
 SAMPLE_ID_KEY = "sample_id"
@@ -56,17 +60,17 @@ CLASSIFICATION_KEY = "Classification"
 
 # experimental design
 MULTIPLEX_BARCODE_TO_SAMPLE_ID = {
-    "AT_Epi_Naive2": {
-        "AT_Epi": "AT_Epi_Naive2",
+    "Week_0": {
+        "B16": "Week_0_out",
     },
-    "AT_Epi_Naive3": {
-        "AT_Epi": "AT_Epi_Naive3",
+    "Week_1": {
+        "B16": "Week_1_out",
     },
-    "AT_Epi_Act147": {
-        "AT_Epi": "AT_Epi_Act147",
+    "Week_2": {
+        "B16": "Week_2_out",
     },
-    "AT_Epi_Act150": {
-        "AT_Epi": "AT_Epi_Act150",
+    "Week_3": {
+        "B16": "Week_3_out",
     }
 }
 SAMPLE_ID_TO_EXPECTED_BARCODES = {}

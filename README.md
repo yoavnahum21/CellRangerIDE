@@ -20,10 +20,8 @@ The API should contain:
 8) Optional: Preprocessing algorithems
 
 
-All you need to do:
+Instructions:
 
-1) Fill out the config file in the const_files folder
-2) If you wish to create .h5 you should add as well a reference transcriptome.
-   You can find the Reference transcriptome on wexac in the next directory:
-   "/home/labs/nyosef/yoavnah/CellRangerIDE/const_files/transcriptome"
-3) If you use multiple samples, you should use "cellranger multi", therefore you have to fill out the multi_template.csv as well.
+1) Fill out the config file located in the const_file folder
+
+2) Dynamic parameters such as: RAM usage, number of cpu cores, will be updated in the program through the script input fields, for example: on your machine run: "python path_to_CellrangerIDE\BackHand\Scripts\main.py 10 5 70" where 10 refers to the number of job, 5 refers to the number of cpu cores and 70 refers to the amout of RAM (70GB)
