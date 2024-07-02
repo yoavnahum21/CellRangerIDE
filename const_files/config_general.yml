@@ -13,19 +13,7 @@ pipeline: multi
 sample_name: example01
 
 # Default: project_name/Output_Files
-output_destination: Default                                                                                     
-
-# Default: whatever when using module load into the path file
-aligner_software_path: Default                                                                                  
-
-# Default: refdata-gex-mm10-2020-A
-alignment_ref_genome_file: Default                                                                              
-
-# Default:
-alignment_ref_vdj_file: Default                                                                                 
-
-# Default: /home/labs/nyosef/yoavnah/CellRangerIDE/const_files/transcriptome
-alignment_ref_genome_path: Default                                                                              
+output_destination: Default                                                                                                                                                            
 
 # Required:
 weizmann_user: yoavnah                                                                                          
@@ -35,82 +23,6 @@ Sample_sheet_address:
 
 # Default: /home/labs/nyosef/yoavnah/CellRangerIDE/Projects/yoav/OutputFiles/{id}_cellrangerpipe.sh
 shell_file: Default                                                                                             
-
-# Required for multi pipeline: Choose between 'feature_barcode' or 'cmo_barcode'
-multiplexing_method: feature_barcode
-
-# Required:
-fastq_path: 
-  - /home/labs/nyosef/yoavnah/NovaSeqX-B/Fastqs/li/lireich/20240515_LH00211_0021_B2233L7LT1/B16_GEX #Add the path to the fastq files here 
-  - /home/labs/nyosef/yoavnah/NovaSeqX-B/Fastqs/li/lireich/20240515_LH00211_0021_B2233L7LT1/B16_HASH #Add the path to the fastq files here
-
-# Required:
-fastq_folders_name:
-  - B16_GEX #Add the name of the folder respectively to the fastq_path here 
-  - B16_HASH #Add the name of the folder respectively to the fastq_path here
-
-# Default: any
-lanes_used:
-  - any #Add the lanes used for the fastq files here
-  - any #Add the lanes used for the fastq files here
-  - any #Add the lanes used for the fastq files here
-
-# Required:
-feature_type:
-  - gene expression #Add the feature type here
-  - Antibody Capture #Add the feature type here
-
-# Optional:
-subsample_rate:
-  - #Add the subsample rate here
-  - #Add the subsample rate here
-  - #Add the subsample rate here
-
-
-# Optional: only if you are using the feature_reference
-feature_reference_csv: 
-
-# Required: (if feature_reference_csv wasn't given)
-hto_id:
-  - Week_0 #Add hashing ID 
-  - Week_1 #Add hashing ID 
-  - Week_2 #Add hashing ID 
-  - Week_3 #Add hashing ID
-
-# Default: hto_names = hto_id 
-hto_names:
-  - Default
-  - 
-  - 
-  - 
-
-# Default: 'R2' 
-hto_read:
-  - Default
-  - 
-  - 
-  - 
-
-# Default: '5PNNNNNNNNNN(BC)' 
-hto_pattern:
-  - Default
-  -
-  -
-  -
-
-# Required 
-hto_sequence:
-  - ADCSX
-  - ASDVASC
-  - DFASDF
-  - FASDFASDFA
-
-# Default: Antibody Capture 
-HTO_feature_type:
-  - Default
-  -
-  -
-  -
 
 # Optional:
 donor: 591C                                                                                                     
