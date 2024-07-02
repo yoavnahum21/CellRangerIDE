@@ -5,12 +5,17 @@ import yaml
 BASE_PATH = "/home/labs/nyosef/yoavnah/CellRangerIDE/"
 REFERENCE_PATH = "/shareDB/CellRanger/"
 
-# Project building folders
+# Config files declaration
 CONST_PATH = os.path.join(BASE_PATH,"const_files")
-CONFIG_PATH = os.path.join(CONST_PATH, "config.yml")
-with open(CONFIG_PATH,'r') as f:
+CONFIG_GENERAL_PATH = os.path.join(CONST_PATH, "config_general.yml")
+with open(CONFIG_GENERAL_PATH,'r') as f:
     config = yaml.safe_load(f)
 
+CONFIG_SELECTED_PIPELINE_PATH = os.path.join(CONST_PATH, "config_" + config['pipeline'] + "_pipeline.yml")
+with open(CONFIG_SELECTED_PIPELINE_PATH,'r') as g:
+    config_selected_pipeline = yaml.safe_load(g) 
+
+# Project building folders
 project_name = config['project_name']
 PROJECT_PATH = os.path.join(BASE_PATH, "Projects")
 PROJECT_NAME_PATH = os.path.join(PROJECT_PATH, project_name)

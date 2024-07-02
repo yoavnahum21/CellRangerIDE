@@ -1,0 +1,73 @@
+# This is the configuration file to run the cellranger pipeline which creates annotated data files for multiple samples!
+
+# Required:
+fastq_path: 
+  - /home/labs/nyosef/yoavnah/NovaSeqX-B/Fastqs/li/lireich/20240515_LH00211_0021_B2233L7LT1/B16_GEX #Add the path to the fastq files here 
+  - /home/labs/nyosef/yoavnah/NovaSeqX-B/Fastqs/li/lireich/20240515_LH00211_0021_B2233L7LT1/B16_HASH #Add the path to the fastq files here
+
+# Default: refdata-gex-mm10-2020-A
+alignment_ref_genome_file: 
+
+# Required, options: 'feature_barcode' or 'cmo_barcode' (for now...)
+multiplexing_method: feature_barcode
+
+# Optional: only if you are using the feature_barcode as your multiplexing_method 
+feature_reference_csv: 
+
+# Required: (if feature_reference_csv wasn't given)
+hto_id:
+  -  #Add hashing ID 
+  -  #Add hashing ID 
+  -  #Add hashing ID 
+  -  #Add hashing ID
+
+# Default: hto_names = hto_id 
+hto_names:
+  - Default
+  - 
+  - 
+  - 
+
+# Default: 'R2' 
+hto_read:
+  - Default
+  - 
+  - 
+  - 
+
+# Default: '5PNNNNNNNNNN(BC)' 
+hto_pattern:
+  - Default
+  -
+  -
+  -
+
+# Required (if feature_reference_csv wasn't given)
+hto_sequence:
+  - ADCSX
+  - ASDVASC
+  - DFASDF
+  - FASDFASDFA
+
+# Default: Antibody Capture 
+HTO_feature_type:
+  - Default
+  -
+  -
+  -
+
+# Optional: only if you are using the cmo_barcode as your multiplexing_method 
+cmo_barcode_csv:
+
+# Required (if cmo_barcode_csv wasn't given)
+sample_id:
+  -
+  -
+
+# Required (if cmo_barcode_csv wasn't given)
+cmo_id:
+  -
+  -
+
+##### Demultiplexing section #####
+##### End of Demultiplexing section ####

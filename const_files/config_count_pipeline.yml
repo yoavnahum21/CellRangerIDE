@@ -1,0 +1,11 @@
+# This is the configuration file to run the cellranger pipeline which creates annotated data files for one sample!
+
+
+# Required
+sample_name:
+
+# Default: refdata-gex-mm10-2020-A
+alignment_ref_genome_file:
+
+# Required
+fastq_path:
