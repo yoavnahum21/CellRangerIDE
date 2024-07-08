@@ -24,6 +24,7 @@ QC_PATH = os.path.join(FILE_PATH, "10x_QC")
 BCL_PATH = os.path.join(FILE_PATH, "BCL")
 CSV_PATH = os.path.join(FILE_PATH, "CSV")
 FASTQ_PATH = os.path.join(FILE_PATH, "Fastqs")
+CUSTOM_REF_PATH = os.path.join(FILE_PATH, "Custom_Ref")
 FASTQC_PATH = os.path.join(FASTQ_PATH, "fastqc")
 H5_PATH = os.path.join(FILE_PATH, "h5")
 H5ADS_PATH = os.path.join(FILE_PATH, "h5ads")
@@ -39,18 +40,21 @@ make_count_path = os.path.join(OUTPUT_PATH, "make_count.sh")
 make_h5_path = os.path.join(OUTPUT_PATH, "make_h5.sh")
 make_h5ads_path = os.path.join(OUTPUT_PATH, "make_h5ads.sh")
 demulti_path = os.path.join(OUTPUT_PATH, "demulti.sh")
+make_reference_path = os.path.join(OUTPUT_PATH, "make_ref.sh")
 basic_run_path = os.path.join(OUTPUT_PATH, "basic_run.sh")
-samplesheet_path = os.path.join(CSV_PATH,"samplesheet.csv")
-feature_reference_path = os.path.join(CSV_PATH,"feature_reference.csv")
 
 # csv format executing file
 
 MULTI_TEMPLATE_CSV_PATH = os.path.join(CONST_PATH, "multi_template.csv")
 MULTI_CSV_PATH = os.path.join(CSV_PATH, "multi.csv")
+samplesheet_path = os.path.join(CSV_PATH,"samplesheet.csv")
+feature_reference_path = os.path.join(CSV_PATH,"feature_reference.csv")
 
 # References
 gex_reference_path = os.path.join(REFERENCE_PATH, "refdata-gex-mm10-2020-A")
 vdj_reference_path = os.path.join(REFERENCE_PATH, "refdata-cellranger-vdj-GRCh38-alts-ensembl-7.1.0")
+custom_gtf_reference_path = os.path.join(CUSTOM_REF_PATH, "custom_ref.gtf")
+custom_fasta_reference_path = os.path.join(CUSTOM_REF_PATH, "custom_ref.fasta")
 
 # keys
 GENE_SYMBOLS_KEY = "gene_symbols"

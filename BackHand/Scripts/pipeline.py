@@ -24,6 +24,7 @@ class pipeline:
             os.makedirs(BCL_PATH)
             os.makedirs(CSV_PATH)
             os.makedirs(FASTQ_PATH)
+            os.makedirs(CUSTOM_REF_PATH)
             os.makedirs(FASTQC_PATH)
             os.makedirs(H5_PATH)
             os.makedirs(H5ADS_PATH)
@@ -98,38 +99,20 @@ class pipeline:
             
 
             # one day the rest of the options will be implemented as well
+        elif self.pipeline                      == "mkref":
+            self.original_fasta_file_path       = config_selected_pipeline['original_fasta_file_path']
+            self.customized_fasta_file_path     = config_selected_pipeline['customized_fasta_file_path']
+            self.fasta_of_new_gene              = config_selected_pipeline['fasta_of_new_gene']
+            self.original_gtf_file_path         = config_selected_pipeline['original_gtf_file_path']
+            self.customized_gtf_file_path       = config_selected_pipeline['customized_gtf_file_path']
+            self.gtf_of_new_gene                = config_selected_pipeline['gtf_of_new_gene']
+            self.filter_gtf_attribute           = config_selected_pipeline['filter_gtf_attribute']
+            self.genome_name                    = config_selected_pipeline['genome_name']
+
         elif self.pipeline               == "vdj":
-            pass
-        elif self.pipeline               == "mkref":
             pass
         elif self.pipeline               == "aggr":
             pass
-
-        self.aligner_ref_genome_path     = config['alignment_ref_genome_file']
-        if self.aligner_ref_genome_path  == None:
-            self.aligner_ref_genome_path = gex_reference_path
-
-        self.aligner_ref_vdj_path       = config['alignment_ref_vdj_file']
-        if self.aligner_ref_vdj_path    == None:
-            self.aligner_ref_vdj_path   = vdj_reference_path
-
-        self.user                       = config['weizmann_user']
-
-        self.shell_file                 = config['shell_file']
-        if self.shell_file              == None:
-            self.shell_file             = OUTPUT_PATH + str(self.id) + "_cellrangerpipe.sh"
-        
-        self.Sample_sheet_address       = config['Sample_sheet_address']
-        
-        self.fastq_folders_name         = config['fastq_folders_name']
-
-        self.fastq_path                 = config['fastq_path']
-
-        self.lanes_used                 = config['lanes_used']
-
-        self.feature_type               = config['feature_type']
-
-        self.multi_csv                  = None
 
         # Runtime parameters
 
@@ -243,7 +226,10 @@ Optional:
     #SBATCH --mem={''}G
     #SBATCH --cpus-per-task={''}
 
-    cellranger mkfastq --run={''} --csv={''} --output-dir={''} --maxjobs={''} --localcores={''} --localmem={''}
+    cellranger mkfastq --run={''} --csv={''} --output-dir={''} \
+        --maxjobs={MAX_JOBS} \
+        --localcores={CPUS_PER_TASK} \
+        --localmem={MEM_PER_TASK}
             """
             )
 
@@ -326,6 +312,7 @@ Optional:
 
 
     def make_samplesheet(self):
+        ## TBD
         pass
 
 
@@ -481,4 +468,41 @@ OPTIONS:
         pass
 
     def make_custom_reference(self):
-        pass
+        with open(make_reference_path, "w+") as f:
+            f.write(
+            f"""#!/usr/bin/bash
+
+    # SBATCH --job-name={''}
+    # SBATCH --output={''}
+    # SBATCH --partition={''}
+    # SBATCH --mem={''}G
+    # SBATCH --cpus-per-task={''}
+    
+    bsub \ 
+    -q gsla_high_gpu \ 
+    -gpu num=1:j_exclusive=yes \ 
+    -R rusage[mem={self.total_memory_used}G] \ 
+    -R affinity[thread*{self.cpus_number}] \ 
+    -Is /bin/bash
+    
+    {self.aligner_software_path} mkgtf \ 
+        {self.original_gtf_file_path} \ 
+        {self.customized_gtf_file_path}"""
+            )
+            for attribute in self.filter_gtf_attribute:
+                if attribute is not None:
+                    f.write(f" \\\n        --attribute=gene_biotype:{attribute}")
+                else:
+                    f.write(f"\\\n")
+                    break
+        
+            f.write(
+                f"""
+
+    {self.aligner_software_path} mkref \ 
+        --genome={self.genome_name} \ 
+        --fasta={self.original_fasta_file_path} \ 
+        --genes={self.customized_gtf_file_path} \ 
+        """
+            )       
+    

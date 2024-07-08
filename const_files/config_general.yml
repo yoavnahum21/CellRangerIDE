@@ -7,7 +7,7 @@ project_name: yoav
 id: 318674249        
 
 # Required: Choose your pipeline!
-pipeline: multi
+pipeline: mkref
 
 # Required for count pipeline: (usually named after the prefix in the fastqs files)
 sample_name: example01
@@ -21,6 +21,9 @@ weizmann_user: yoavnah
 # Optional:
 Sample_sheet_address:
 
+# Default:
+aligner_software_path: /apps/RH7U2/general/cellranger/7.1.0/cellranger
+
 # Default: /home/labs/nyosef/yoavnah/CellRangerIDE/Projects/yoav/OutputFiles/{id}_cellrangerpipe.sh
 shell_file: Default                                                                                             
 
@@ -32,7 +35,6 @@ seq_run: 003
 
 # Optional: if you are not using AWS S3 this one is not necessary
 s3_access_file:                                                                                                                                                                                     
-
 
 # Runtime parameters:
 
