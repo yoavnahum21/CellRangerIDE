@@ -2,24 +2,46 @@
 
 # Required:
 fastq_path: 
-  - /home/labs/nyosef/yoavnah/NovaSeqX-B/Fastqs/li/lireich/20240515_LH00211_0021_B2233L7LT1/B16_GEX #Add the path to the fastq files here 
-  - /home/labs/nyosef/yoavnah/NovaSeqX-B/Fastqs/li/lireich/20240515_LH00211_0021_B2233L7LT1/B16_HASH #Add the path to the fastq files here
+  - /home/labs/nyosef/Collaboration/Shlomit_scGEX_Oct2023/231019_A00929_1107_BHLLWJDRX3/li/lireich/231019_A00929_1107_BHLLWJDRX3/AT_LP_EpCAM- #Add the path to the fastq files here 
+  - /home/labs/nyosef/Collaboration/Shlomit_scGEX_Oct2023/231019_A00929_1107_BHLLWJDRX3/li/lireich/231019_A00929_1107_BHLLWJDRX3/CMO_AT_LP_EpCAM- #Add the path to the fastq files here
 
-# Default: refdata-gex-mm10-2020-A
-alignment_ref_genome_file: 
+# Default: refdata-gex-mm10-2020-Apwd
+alignment_ref_genome_file: Default
 
 # Required, options: 'feature_barcode' or 'cmo_barcode' (for now...)
-multiplexing_method: feature_barcode
+multiplexing_method: cmo_barcode
 
 # Optional: only if you are using the feature_barcode as your multiplexing_method 
-feature_reference_csv: 
+feature_reference_csv: Default
+
+# Required: true or false
+create_bam: true
+
+# Required: usually named after the prefix in the fastqs files
+sample_name: 
+  - B16
+
+# Required: (named after the fastqs folder)
+fastq_folders_name:
+  - AT_LP_EpCAM
+  - CMO_AT_LP_EpCAM
+
+# Default: any
+lanes_used: 
+  - Default
+  - 
+
+# Required: choose from the next list respectively to the fastq order: gene expression, Antibody Capture.
+feature_types:
+  - Gene Expression
+  - Multiplexing Capture
 
 # Required: (if feature_reference_csv wasn't given)
 hto_id:
-  -  #Add hashing ID 
-  -  #Add hashing ID 
-  -  #Add hashing ID 
-  -  #Add hashing ID
+  -  Default #Add hashing ID 
+  -   #Add hashing ID 
+  -   #Add hashing ID 
+  -   #Add hashing ID
 
 # Default: hto_names = hto_id 
 hto_names:
@@ -44,10 +66,10 @@ hto_pattern:
 
 # Required (if feature_reference_csv wasn't given)
 hto_sequence:
-  - ADCSX
-  - ASDVASC
-  - DFASDF
-  - FASDFASDFA
+  - AACCTTTGCCACTGC
+  - GTCCGACTAATAGCT
+  - CAGGTTGTTGTCATT
+  - TATTTCCACCCGGTC
 
 # Default: Antibody Capture 
 HTO_feature_type:
@@ -57,17 +79,21 @@ HTO_feature_type:
   -
 
 # Optional: only if you are using the cmo_barcode as your multiplexing_method 
-cmo_barcode_csv:
+cmo_barcode_csv: Default
 
 # Required (if cmo_barcode_csv wasn't given)
 sample_id:
-  -
-  -
+  - AT_LP_EpCAM-Naive2
+  - AT_LP_EpCAM-Naive3
+  - AT_LP_EpCAM-Naive147
+  - AT_LP_EpCAM-Naive150
 
 # Required (if cmo_barcode_csv wasn't given)
 cmo_id:
-  -
-  -
+  - CMO309
+  - CMO310
+  - CMO311
+  - CMO312
 
 ##### Demultiplexing section #####
 ##### End of Demultiplexing section ####

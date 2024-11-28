@@ -1,3 +1,4 @@
+# 
 from pipeline import pipeline
 
 def which_pipeline(pipeline_num) -> None:
@@ -17,10 +18,11 @@ def which_pipeline(pipeline_num) -> None:
     elif pipeline_num == '7':
         return None
     else: 
-        print("Your choise is not valid!!!\nPlz choose another one ")
+        print("Your choise is not valid!!!\nPlz choose another pip3line :P ")
     return None
 
 
 my_pipe = pipeline()
+
 which_pipeline(my_pipe.pipeline)
 print("Ciao!")

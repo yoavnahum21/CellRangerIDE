@@ -1,16 +1,13 @@
-# This is the configuration file to run the cellranger pipeline on the Weizmann cluster/ AWS S3. 
+# This is the configuration file to run the cellranger pipeline on the Weizmann cluster/ AWS S3
 
 # Required:
-project_name: yoav
+project_name: Oier
 
 # Required:
-id: 318674249        
+id: AT_LP_EpCAM        
 
 # Required: Choose your pipeline!
-pipeline: mkref
-
-# Required for count pipeline: (usually named after the prefix in the fastqs files)
-sample_name: example01
+pipeline: demulti
 
 # Default: project_name/Output_Files
 output_destination: Default                                                                                                                                                            
@@ -21,11 +18,14 @@ weizmann_user: yoavnah
 # Optional:
 Sample_sheet_address:
 
-# Default:
-aligner_software_path: /apps/RH7U2/general/cellranger/7.1.0/cellranger
+# Default: /apps/RH7U2/general/cellranger/7.1.0/cellranger
+aligner_software_path: 
 
 # Default: /home/labs/nyosef/yoavnah/CellRangerIDE/Projects/yoav/OutputFiles/{id}_cellrangerpipe.sh
-shell_file: Default                                                                                             
+shell_file: Default
+
+# Default: Designated to Wexac
+running_machine: Default
 
 # Optional:
 donor: 591C                                                                                                     
@@ -34,9 +34,9 @@ donor: 591C
 seq_run: 003 
 
 # Optional: if you are not using AWS S3 this one is not necessary
-s3_access_file:                                                                                                                                                                                     
+s3_access_file:                                                                                                                                                         
 
-# Runtime parameters:
+# Runtime parameters
 
 # Required
 jobs_number: 10
@@ -46,3 +46,6 @@ cpus_number: 5
 
 # Required (in GB)
 total_memory_used: 70 
+
+# Required
+queue: long

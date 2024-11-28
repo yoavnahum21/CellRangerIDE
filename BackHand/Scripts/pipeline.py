@@ -1,8 +1,9 @@
 from _utils import * 
 import os
+import sys
 import shutil
 import subprocess
-import hashsolo
+import demultiplex as demultiplex
 import pandas as pd
 import numpy as np
 import scanpy as sc
@@ -47,10 +48,13 @@ class pipeline:
         if self.output_destination      == None:
             self.output_destinatxion    = OUTPUT_PATH
         
-        
+        self.running_machine            = config['running_machine']
+        if self.running_machine         == 'Default':
+            self.running_machine        = "Wexac"
+
         self.aligner_software_path      = config['aligner_software_path']
         if self.aligner_software_path   == None:
-            self.aligner_software_path  = "/apps/RH7U2/general/cellranger/7.1.0/cellranger"
+            self.aligner_software_path  = DEFAULT_ALIGNER_PATH
 
         if self.pipeline                 == "mkfastq":
             self.BCL_path                = config_selected_pipeline['BCL_path']
@@ -69,49 +73,64 @@ class pipeline:
 
         elif self.pipeline                   == "multi":
             self.aligner_ref_genome_path     = config_selected_pipeline['alignment_ref_genome_file']
-            if self.aligner_ref_genome_path  == None:
+            if self.aligner_ref_genome_path  == 'Default':
                 self.aligner_ref_genome_path = gex_reference_path
             self.fastq_path                  = config_selected_pipeline['fastq_path']
             self.multiplexing_method         = config_selected_pipeline['multiplexing_method']
+            self.fastq_folders_name          = config_selected_pipeline['fastq_folders_name']
+            self.lanes_used                  = config_selected_pipeline['lanes_used']
+            if self.lanes_used[0]            == 'Default':
+                self.lanes_used              =  ['any'] * len(self.lanes_used)
+            self.create_bam                  = config_selected_pipeline['create_bam']
+            self.feature_types                = config_selected_pipeline['feature_types']
             if self.multiplexing_method      == "feature_barcode":
                 self.feature_reference_csv   = config_selected_pipeline['feature_reference_csv']
-                if self.feature_reference_csv== None:
+                if self.feature_reference_csv== 'Default':
                     self.hto_id              = config_selected_pipeline['hto_id']
                     self.hto_names           = config_selected_pipeline['hto_names']
-                    if self.hto_names[0]     == None:
+                    if self.hto_names[0]     == 'Default':
                         self.hto_names       = self.hto_id
                     self.hto_pattern         = config_selected_pipeline['hto_pattern']
-                    if self.hto_pattern[0]   == None:
+                    if self.hto_pattern[0]   == 'Default':
                         self.hto_pattern     = ['5PNNNNNNNNNN(BC)'] * len(self.hto_pattern)
                     self.hto_read            = config_selected_pipeline['hto_read']
-                    if self.hto_read[0]      == None:
+                    if self.hto_read[0]      == 'Default':
                         self.hto_read        = ['R2'] * len(self.hto_read)
                     self.hto_sequence        = config_selected_pipeline['hto_sequence']
                     self.HTO_feature_type    = config_selected_pipeline['HTO_feature_type']
-                    if self.HTO_feature_type[0] == None:
+                    if self.HTO_feature_type[0] == 'Default':
                         self.HTO_feature_type= ['Antibody Capture'] * len(self.HTO_feature_type)
 
             if self.multiplexing_method      == "cmo_barcode":
                 self.cmo_barcode_csv         = config_selected_pipeline['cmo_barcode_csv']
-                if self.cmo_barcode_csv      == None:
+                if self.cmo_barcode_csv      == 'Default':
                     self.sample_id           = config_selected_pipeline['sample_id']
                     self.cmo_id              = config_selected_pipeline['cmo_id']
             
 
             # one day the rest of the options will be implemented as well
-        elif self.pipeline                      == "mkref":
-            self.original_fasta_file_path       = config_selected_pipeline['original_fasta_file_path']
-            self.customized_fasta_file_path     = config_selected_pipeline['customized_fasta_file_path']
-            self.fasta_of_new_gene              = config_selected_pipeline['fasta_of_new_gene']
-            self.original_gtf_file_path         = config_selected_pipeline['original_gtf_file_path']
-            self.customized_gtf_file_path       = config_selected_pipeline['customized_gtf_file_path']
-            self.gtf_of_new_gene                = config_selected_pipeline['gtf_of_new_gene']
-            self.filter_gtf_attribute           = config_selected_pipeline['filter_gtf_attribute']
-            self.genome_name                    = config_selected_pipeline['genome_name']
+        elif self.pipeline                   == "mkref":
+            self.original_fasta_file_path    = config_selected_pipeline['original_fasta_file_path']
+            self.customized_fasta_file_path  = config_selected_pipeline['customized_fasta_file_path']
+            self.fasta_of_new_gene           = config_selected_pipeline['fasta_of_new_gene']
+            self.original_gtf_file_path      = config_selected_pipeline['original_gtf_file_path']
+            self.customized_gtf_file_path    = config_selected_pipeline['customized_gtf_file_path']
+            self.gtf_of_new_gene             = config_selected_pipeline['gtf_of_new_gene']
+            self.filter_gtf_attribute        = config_selected_pipeline['filter_gtf_attribute']
+            self.genome_name                 = config_selected_pipeline['genome_name']
 
-        elif self.pipeline               == "vdj":
+        elif self.pipeline                      == "demulti":
+            self.demultiplex_method             = config_selected_pipeline['demultiplex_method']
+            self.adata_path                     = config_selected_pipeline['adata_path']
+            self.sample_names                   = config_selected_pipeline['sample_names']
+            self.hto_list_per_sample            = config_selected_pipeline['hto_list_per_sample']
+            self.sample_id_to_expected_barcodes = {}
+            for index, sample in enumerate(self.sample_names):
+                self.sample_id_to_expected_barcodes.update({sample: self.hto_list_per_sample[index]})
+
+        elif self.pipeline                   == "vdj":
             pass
-        elif self.pipeline               == "aggr":
+        elif self.pipeline                   == "aggr":
             pass
 
         # Runtime parameters
@@ -119,6 +138,7 @@ class pipeline:
         self.cpus_number                = config['cpus_number']
         self.jobs_number                = config['jobs_number']
         self.total_memory_used          = config['total_memory_used']
+        self.queue                      = config['queue']
     
     def __str__(self) -> str:
         pass
@@ -347,19 +367,26 @@ OPTIONS:
         '''
 
         # Here we create a compatible csv file for the multi pipeline.
-        if len(config['fastq_path']) == 0 or len(config['fastq_path']) != len(config['fastq_folders_name']) or len(config['feature_type'])  != len(config['fastq_folders_name']): # None parameters should be entered as condition as well
-            print("Your config is not valid!, plz try again later")
-            return
+
+#        if len(config_selected_pipeline['fastq_path']) == 0 or len(config_selected_pipeline['fastq_path']) != len(config_selected_pipeline['fastq_folders_name']) or len(config_selected_pipeline['feature_type'])  != len(config['fastq_folders_name']): # None parameters should be entered as condition as well
+#            print("Your config is not valid!, plz try again later")
+#            return
+
         self.multi_csv = pd.DataFrame(columns=['[gene-expression]',None, None, None])
         col = ['[gene-expression]',None, None, None]
         self.multi_csv.loc[0] = ['reference',None, None, None]
         row_reference_index = self.multi_csv[self.multi_csv.iloc[:, 0] == 'reference'].index[0]
         self.multi_csv.iloc[row_reference_index, 1] = self.aligner_ref_genome_path
+        if self.create_bam is True:
+            self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["create-bam", "true", None, None]], columns=col)], ignore_index=True)
+        else:
+            self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["create-bam", "false", None, None]], columns=col)], ignore_index=True)
+
         self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([[None, None, None, None]], columns=col)], ignore_index=True)
         self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([[None, None, None, None]], columns=col)], ignore_index=True)
         self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([['[libraries]', None, None, None]], columns=col)], ignore_index=True)
         variable_libraries_names = ['fastq_id', 'fastqs', 'lanes', 'feature_types']
-        variable_libraries_lists = list(zip(self.fastq_folders_name, self.fastq_path, self.lanes_used, self.feature_type))
+        variable_libraries_lists = list(zip(self.fastq_folders_name, self.fastq_path, self.lanes_used, self.feature_types))
         self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([variable_libraries_names], columns=col)], ignore_index=True)
         library_data_df = pd.DataFrame(variable_libraries_lists, columns=col)
         self.multi_csv = pd.concat([self.multi_csv, library_data_df], ignore_index=True)
@@ -368,15 +395,15 @@ OPTIONS:
         if (self.multiplexing_method == 'cmo_barcode'):
             self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([['[samples]', None, None, None]], columns=col)], ignore_index=True)
             variable_samples_names = ['sample_id', 'cmo_ids', 'description', None]
-            variable_samples_list  = list(zip(self.fastq_folders_name,[None, None, None, None], [None, None, None, None], [None, None, None, None]))
+            variable_samples_list  = list(zip(self.sample_id,self.cmo_id, [None] * len(self.sample_id),[None] * len(self.sample_id)))
             self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([variable_samples_names], columns=col)], ignore_index=True)
             samples_data_df = pd.DataFrame(variable_samples_list, columns=col)
             self.multi_csv = pd.concat([self.multi_csv, samples_data_df], ignore_index=True)
             self.multi_csv.to_csv(MULTI_CSV_PATH, header=False, index=False)
         elif (self.multiplexing_method == 'feature_barcode'):
             self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([['[feature]', None, None, None]], columns=col)], ignore_index=True)
-            if(self.feature_reference_csv != None):
-                self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([['reference', self.feature_ref_csv, None, None]], columns=col)], ignore_index=True)
+            if(self.feature_reference_csv != 'Default'):
+                self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([['reference', self.feature_reference_csv, None, None]], columns=col)], ignore_index=True)
             else:
                 sample_sheet = pd.DataFrame([self.hto_id,self.hto_names,self.hto_read,self.hto_pattern,self.hto_sequence,self.HTO_feature_type]).transpose()
                 sample_sheet.columns = ['id','name','read','pattern','sequence','feature_type']
@@ -390,45 +417,74 @@ OPTIONS:
         with open(make_multi_path, "w+") as f:
             f.write(
             f"""#!/usr/bin/bash
-
-    # SBATCH --job-name={''}
-    # SBATCH --output={''}
-    # SBATCH --partition={''}
-    # SBATCH --mem={''}G
-    # SBATCH --cpus-per-task={''}
-    
-    bsub\
-    -q gsla_high_gpu\
-    -gpu num=1:j_exclusive=yes\
-    -R rusage[mem={self.total_memory_used}G]\
-    -R affinity[thread*{self.cpus_number}]\
-    -Is /bin/bash
     
     {self.aligner_software_path} multi\
     --id={self.id}\
     --csv={MULTI_CSV_PATH}\
     --maxjobs={self.jobs_number}\
     --localcores={self.cpus_number}\
-    --localmem={self.total_memory_used}G
+    --localmem={self.total_memory_used}
 
-    mv {self.id} {H5_PATH}
-    mv {make_multi_path} {H5_PATH}
+            """ 
+            )
+        if self.running_machine == "Wexac":
+            with open(run_file_path, "w+") as g:
+                g.write(
+            f"""
+#BSUB -J make_multi
+#BSUB -q long
+#BSUB -R rusage[mem=70G]
+#BSUB -R affinity[thread*50]
+#BSUB -n 5 -R "span[hosts=1]"
+#BSUB -oo %J.out.log
+#BSUB -eo %J.err.log    
+
+sh {make_multi_path}
+
             """
+
             )
     
     def demultiplex(self):    
-        adata = sc.read_10x_h5(os.path.join(H5_PATH, f"{self.id}/outs/sample_filtered_feature_bc_matrix.h5"), gex_only=False)
-        sample = "B16"
-        adata = hashsolo.demultiplex(sample,adata,plot=False)
-        adata.var[GENE_SYMBOLS_KEY] = adata.var.index
-        adata.var.set_index(GENE_IDS_KEY, inplace=True)
+        
+        if self.demultiplex_method == 'hashsolo':
+            for index in range(len(self.sample_names)):
+                adata = sc.read_10x_h5(self.adata_path[index], gex_only=False)
+                sample, hashtags = list(self.sample_id_to_expected_barcodes.items())[index]
+                number_of_noise_barcodes = len(hashtags) - 1
+                adata = demultiplex.hashsolo({sample: hashtags}, sample=sample, adata=adata, number_of_noise_barcodes=number_of_noise_barcodes, plot=False)
+                
+                adata.var[GENE_SYMBOLS_KEY] = adata.var.index
+                adata.var.set_index(GENE_IDS_KEY, inplace=True)
 
-        adata.obs[SAMPLE_ID_KEY] = sample
-        adata.obs.index = adata.obs.index + "-" + adata.obs[SAMPLE_ID_KEY]
+                adata.obs[SAMPLE_ID_KEY] = sample
+                adata.obs.index = adata.obs.index + "-" + adata.obs[SAMPLE_ID_KEY]
 
-        adata_path = os.path.join(H5ADS_PATH, f"{sample}.h5ad")
-        adata.write(adata_path)
+                adata_path = os.path.join(DEMULTIPLEXED_H5ADS_PATH, f"{sample}.h5ad")
+                adata.write(adata_path)
 
+        elif self.demultiplex_method == 'demultiplex2':
+            log_file = open("/home/labs/nyosef/yoavnah/CellRangerIDE/Projects/Oier/File_Path/h5ads/demultiplexed/deMULTIplex_log.log", "w+")
+            os.dup2(log_file.fileno(), sys.stdout.fileno())
+            for index in range(len(self.sample_names)):
+                adata = sc.read_10x_h5(self.adata_path[index], gex_only=False)
+                sample, hashtags = list(self.sample_id_to_expected_barcodes.items())[index]
+                adata = demultiplex.demultiplex2({sample: hashtags}, sample=sample, adata=adata, plot=False)
+
+                adata.var[GENE_SYMBOLS_KEY] = adata.var.index
+                adata.var.set_index(GENE_IDS_KEY, inplace=True)
+
+                adata.obs[SAMPLE_ID_KEY] = sample
+                adata.obs.index = adata.obs.index + "-" + adata.obs[SAMPLE_ID_KEY]
+
+                adata_path = os.path.join(DEMULTIPLEXED_H5ADS_PATH, f"{sample}.h5ad")
+                adata.write(adata_path)
+            
+            sys.stdout = sys.__stdout__
+            log_file.close()
+
+        else:
+            print("suupppp, check out you demultiplex method, it's not valid!!")
 
     def aggregate(self):
         '''
@@ -438,7 +494,7 @@ Aggregate data from multiple Cell Ranger runs
 USAGE:
     cellranger aggr [OPTIONS] --id <ID> --csv <CSV>
 
-OPTIONS:
+OPTIONS:    
         --id <ID>               A unique run id and output folder name [a-zA-Z0-9_-]+
         --description <TEXT>    Sample description to embed in output files [default: ]
         --csv <CSV>             Path of CSV file enumerating 'cellranger count/vdj/multi' outputs
@@ -499,7 +555,7 @@ OPTIONS:
             f.write(
                 f"""
 
-    {self.aligner_software_path} mkref \ 
+     {self.aligner_software_path} mkref \ 
         --genome={self.genome_name} \ 
         --fasta={self.original_fasta_file_path} \ 
         --genes={self.customized_gtf_file_path} \ 

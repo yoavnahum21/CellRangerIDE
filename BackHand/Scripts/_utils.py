@@ -1,8 +1,12 @@
 import os
 import pathlib
 import yaml
+import sys
 
-BASE_PATH = "/home/labs/nyosef/yoavnah/CellRangerIDE/"
+try:
+    BASE_PATH = sys.argv[1]
+except IndexError:
+    BASE_PATH = "/home/labs/nyosef/yoavnah/CellRangerIDE/"
 REFERENCE_PATH = "/shareDB/CellRanger/"
 
 # Config files declaration
@@ -42,6 +46,11 @@ make_h5ads_path = os.path.join(OUTPUT_PATH, "make_h5ads.sh")
 demulti_path = os.path.join(OUTPUT_PATH, "demulti.sh")
 make_reference_path = os.path.join(OUTPUT_PATH, "make_ref.sh")
 basic_run_path = os.path.join(OUTPUT_PATH, "basic_run.sh")
+run_file_path = os.path.join(OUTPUT_PATH, "run.sh")
+
+# Aligners
+
+DEFAULT_ALIGNER_PATH = "/apps/easybd/easybuild/amd/software/CellRanger/8.0.1/bin/cellranger"
 
 # csv format executing file
 
@@ -67,28 +76,6 @@ MODEL_KEY = "model"
 ANTIBODY_KEY = "Antibody Capture"
 CLASSIFICATION_KEY = "Classification"
 
-# experimental design
-MULTIPLEX_BARCODE_TO_SAMPLE_ID = {
-    "Week_0": {
-        "B16": "Week_0_out",
-    },
-    "Week_1": {
-        "B16": "Week_1_out",
-    },
-    "Week_2": {
-        "B16": "Week_2_out",
-    },
-    "Week_3": {
-        "B16": "Week_3_out",
-    }
-}
-SAMPLE_ID_TO_EXPECTED_BARCODES = {}
-for barcode, barcode_dict in MULTIPLEX_BARCODE_TO_SAMPLE_ID.items():
-    for sample_id, value in barcode_dict.items():
-        if sample_id not in SAMPLE_ID_TO_EXPECTED_BARCODES:
-            barcodes = []
-        else:
-            barcodes = SAMPLE_ID_TO_EXPECTED_BARCODES[sample_id]
-        if value is not None and barcode not in barcodes:
-            barcodes.append(barcode)
-        SAMPLE_ID_TO_EXPECTED_BARCODES[sample_id] = barcodes
+# program runner
+
+R_RUNNER = "/home/labs/nyosef/yoavnah/miniconda3/envs/yoav_env/envs/r_env/bin/Rscript"

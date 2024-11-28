@@ -1,0 +1,11 @@
+adata_path:
+  - /home/labs/nyosef/yoavnah/CellRangerIDE/Projects/Oier/OutputFiles/AT_EPi/outs/per_sample_outs/AT_EPi/count/sample_filtered_feature_bc_matrix.h5
+
+sample_names:
+  - AT_EPi
+
+hto_list_per_sample: # Pay attention that the lenght of the list compatible to the sample_name list
+  - ['AT_Epi_Naive2', 'AT_Epi_Naive3', 'AT_Epi_Act147', 'AT_Epi_Act150']
+
+demultiplex_method: demultiplex2 # hashsolo or demultiplex2
+
