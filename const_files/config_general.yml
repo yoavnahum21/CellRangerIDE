@@ -7,7 +7,7 @@ project_name: Oier
 id: AT_LP_EpCAM        
 
 # Required: Choose your pipeline!
-pipeline: demulti
+pipeline: multi
 
 # Default: project_name/Output_Files
 output_destination: Default                                                                                                                                                            

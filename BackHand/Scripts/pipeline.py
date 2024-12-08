@@ -8,6 +8,8 @@ import pandas as pd
 import numpy as np
 import scanpy as sc
 import anndata as ad
+import requests
+import subprocess
 
 MEM_PER_TASK = 70
 CPUS_PER_TASK = 4
@@ -31,6 +33,10 @@ class pipeline:
             os.makedirs(H5ADS_PATH)
             os.makedirs(BEFORE_DEMULTI_H5ADS_PATH)
             os.makedirs(DEMULTIPLEXED_H5ADS_PATH)
+            os.makedirs(INCPM_PATH)
+            os.makedirs(FASTQ_INCPM_PATH)
+            os.makedirs(SAMPLE_SHEET_INCPM_PATH)
+            os.makedirs(CSV_INCPM_PATH)
             os.makedirs(OUTPUT_PATH)
 
         else:
@@ -75,39 +81,79 @@ class pipeline:
             self.aligner_ref_genome_path     = config_selected_pipeline['alignment_ref_genome_file']
             if self.aligner_ref_genome_path  == 'Default':
                 self.aligner_ref_genome_path = gex_reference_path
-            self.fastq_path                  = config_selected_pipeline['fastq_path']
-            self.multiplexing_method         = config_selected_pipeline['multiplexing_method']
-            self.fastq_folders_name          = config_selected_pipeline['fastq_folders_name']
-            self.lanes_used                  = config_selected_pipeline['lanes_used']
-            if self.lanes_used[0]            == 'Default':
-                self.lanes_used              =  ['any'] * len(self.lanes_used)
-            self.create_bam                  = config_selected_pipeline['create_bam']
-            self.feature_types                = config_selected_pipeline['feature_types']
-            if self.multiplexing_method      == "feature_barcode":
-                self.feature_reference_csv   = config_selected_pipeline['feature_reference_csv']
-                if self.feature_reference_csv== 'Default':
-                    self.hto_id              = config_selected_pipeline['hto_id']
-                    self.hto_names           = config_selected_pipeline['hto_names']
-                    if self.hto_names[0]     == 'Default':
-                        self.hto_names       = self.hto_id
-                    self.hto_pattern         = config_selected_pipeline['hto_pattern']
-                    if self.hto_pattern[0]   == 'Default':
-                        self.hto_pattern     = ['5PNNNNNNNNNN(BC)'] * len(self.hto_pattern)
-                    self.hto_read            = config_selected_pipeline['hto_read']
-                    if self.hto_read[0]      == 'Default':
-                        self.hto_read        = ['R2'] * len(self.hto_read)
-                    self.hto_sequence        = config_selected_pipeline['hto_sequence']
-                    self.HTO_feature_type    = config_selected_pipeline['HTO_feature_type']
-                    if self.HTO_feature_type[0] == 'Default':
-                        self.HTO_feature_type= ['Antibody Capture'] * len(self.HTO_feature_type)
+            self.create_bam                     = config_selected_pipeline['create_bam']
+            self.sample_sheet                = config_selected_pipeline['INCPM_link']
+            if self.sample_sheet             == None:
+                self.fastq_path                     = config_selected_pipeline['fastq_path']
+                self.multiplexing_method            = config_selected_pipeline['multiplexing_method']
+                self.fastq_folders_name             = config_selected_pipeline['fastq_folders_name']
+                self.lanes_used                     = config_selected_pipeline['lanes_used']
+                if self.lanes_used[0]               == 'Default':
+                    self.lanes_used                 =  ['any'] * len(self.lanes_used)
+                self.feature_types                  = config_selected_pipeline['feature_types']
+                if self.multiplexing_method         == "feature_barcode":
+                    self.feature_reference_csv      = config_selected_pipeline['feature_reference_csv']
+                    if self.feature_reference_csv   == 'Default':
+                        self.feature_reference_csv  =   feature_reference_path
+                        self.hto_id                 = config_selected_pipeline['hto_id']
+                        self.hto_names              = config_selected_pipeline['hto_names']
+                        if self.hto_names[0]        == 'Default':
+                            self.hto_names          = self.hto_id
+                        self.hto_pattern            = config_selected_pipeline['hto_pattern']
+                        if self.hto_pattern[0]      == 'Default':
+                            self.hto_pattern        = ['5PNNNNNNNNNN(BC)'] * len(self.hto_pattern)
+                        self.hto_read               = config_selected_pipeline['hto_read']
+                        if self.hto_read[0]         == 'Default':
+                            self.hto_read           = ['R2'] * len(self.hto_read)
+                        self.hto_sequence           = config_selected_pipeline['hto_sequence']
+                        self.HTO_feature_type       = config_selected_pipeline['HTO_feature_type']
+                        if self.HTO_feature_type[0] == 'Default':
+                            self.HTO_feature_type   = ['Antibody Capture'] * len(self.HTO_feature_type)
 
-            if self.multiplexing_method      == "cmo_barcode":
-                self.cmo_barcode_csv         = config_selected_pipeline['cmo_barcode_csv']
-                if self.cmo_barcode_csv      == 'Default':
-                    self.sample_id           = config_selected_pipeline['sample_id']
-                    self.cmo_id              = config_selected_pipeline['cmo_id']
+                if self.multiplexing_method         == "cmo_barcode":
+                    self.cmo_barcode_csv            = config_selected_pipeline['cmo_barcode_csv']
+                    if self.cmo_barcode_csv         == 'Default':
+                        self.sample_id_cmo              = config_selected_pipeline['sample_id_cmo']
+                        self.cmo_id                 = config_selected_pipeline['cmo_id']
+
+            else:
+                incpm_path                          = config_selected_pipeline['INCPM_directory']
+                if incpm_path                       == 'Default':
+                    incpm_path                      = INCPM_PATH
+                self.sample_sheet_path              = os.path.join(SAMPLE_SHEET_INCPM_PATH, "SampleSheet.csv")
+                incpm_link                          = config_selected_pipeline['INCPM_link']
+                copy_process_samplesheet            = os.path.join(SAMPLE_SHEET_INCPM_PATH, "copy_samplesheet.sh")
+                with open(copy_process_samplesheet, "w+") as f:
+                    f.write(
+f"wget --no-check-certificate {incpm_link}/SampleSheet.csv --output-document={self.sample_sheet_path}"
+                )
+                os.system(copy_process_samplesheet)
+                self.sample_sheet                   = pd.read_csv(self.sample_sheet_path)
+                samplesheet_relevant_index          = self.sample_sheet[self.sample_sheet.isin(['Sample_ID']).any(axis=1)].index[0]
+                df                                  = pd.read_csv(self.sample_sheet_path, skiprows=samplesheet_relevant_index+1)
+                self.sample_names                   = df['Sample_Name'].to_list()
+                self.lanes_used                     = df['Lane'].to_list()
+                self.fastq_folders_name             = self.sample_names
+                self.multiplexing_method            = config_selected_pipeline['multiplexing_method']
+                self.feature_reference_csv          = config_selected_pipeline['feature_reference_csv']
+                self.feature_types                  = []
+                self.fastq_path                     = []
+                feautre_type_list                   = ["gene expression","Antibody Capture","CRISPR Guide Capture","Multiplexing Capture","VDJ-B","VDJ-T","VDJ-T-GD","Antigen Capture #5' Antigen Capture only"]
+                for sample in self.sample_names:
+                    self.fastq_path.append(f"{FASTQ_INCPM_PATH}/{sample}/")
+                    print(f"which feautre type would you like to use for the sample: {sample}")
+                    type = int(input("1.Gene Expression\n2.Antibody Capture\n3.CRISPR Guide Capture\n4.Multiplexing Capture\n5.VDJ-B\n6.VDJ-T\n7.VDJ-T-GD\n8.Antigen Capture #5' Antigen Capture only\n"))
+                    self.feature_types.append(feautre_type_list[type-1])
+                copy_process_fastqs                 = os.path.join(FASTQ_INCPM_PATH, "copy_fastq.sh")
+                if not os.listdir(FASTQ_INCPM_PATH):
+                    for sample in self.sample_names:
+                        with open(copy_process_fastqs, "a") as f:
+                            f.write(
+f'wget -r -np -nd -A "*.fastq.gz" --no-check-certificate {incpm_link}{sample}/ -P {FASTQ_INCPM_PATH}/{sample}/\n'
+                            ) 
+                    os.system(copy_process_fastqs)
+
             
-
             # one day the rest of the options will be implemented as well
         elif self.pipeline                   == "mkref":
             self.original_fasta_file_path    = config_selected_pipeline['original_fasta_file_path']
@@ -331,10 +377,6 @@ Optional:
             )
 
 
-    def make_samplesheet(self):
-        ## TBD
-        pass
-
 
     def multiplex(self):
 
@@ -395,7 +437,7 @@ OPTIONS:
         if (self.multiplexing_method == 'cmo_barcode'):
             self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([['[samples]', None, None, None]], columns=col)], ignore_index=True)
             variable_samples_names = ['sample_id', 'cmo_ids', 'description', None]
-            variable_samples_list  = list(zip(self.sample_id,self.cmo_id, [None] * len(self.sample_id),[None] * len(self.sample_id)))
+            variable_samples_list  = list(zip(self.sample_id_cmo,self.cmo_id, [None] * len(self.sample_id_cmo),[None] * len(self.sample_id_cmo)))
             self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([variable_samples_names], columns=col)], ignore_index=True)
             samples_data_df = pd.DataFrame(variable_samples_list, columns=col)
             self.multi_csv = pd.concat([self.multi_csv, samples_data_df], ignore_index=True)

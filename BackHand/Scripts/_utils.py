@@ -34,6 +34,10 @@ H5_PATH = os.path.join(FILE_PATH, "h5")
 H5ADS_PATH = os.path.join(FILE_PATH, "h5ads")
 DEMULTIPLEXED_H5ADS_PATH = os.path.join(H5ADS_PATH, "demultiplexed")
 BEFORE_DEMULTI_H5ADS_PATH = os.path.join(H5ADS_PATH, "not_demultiplexed")
+INCPM_PATH = os.path.join(FILE_PATH, "INCP")
+FASTQ_INCPM_PATH = os.path.join(INCPM_PATH, "fastqs")
+SAMPLE_SHEET_INCPM_PATH = os.path.join(INCPM_PATH, "sample_sheet")
+CSV_INCPM_PATH = os.path.join(INCPM_PATH, "CSV")
 OUTPUT_PATH = os.path.join(PROJECT_NAME_PATH, "OutputFiles/")
 
 # Shell files location

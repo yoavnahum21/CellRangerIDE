@@ -14,7 +14,7 @@ def which_pipeline(pipeline_num) -> None:
     elif pipeline_num == 'mkref':
         my_pipe.make_custom_reference()
     elif pipeline_num == '6':
-        my_pipe.make_samplesheet()
+        return None
     elif pipeline_num == '7':
         return None
     else: 
