@@ -1,10 +1,10 @@
 # This is the configuration file to run the cellranger pipeline on the Weizmann cluster/ AWS S3
 
 # Required:
-project_name: Oier
+project_name: giacococmo2
 
 # Required:
-id: AT_LP_EpCAM        
+id: liver
 
 # Required: Choose your pipeline!
 pipeline: multi
@@ -33,7 +33,7 @@ donor: 591C
 # Optional:
 seq_run: 003 
 
-# Optional: if you are not using AWS S3 this one is not necessary
+# Optional: if you are not using AWS s3 this one is not necessary
 s3_access_file:                                                                                                                                                         
 
 # Runtime parameters

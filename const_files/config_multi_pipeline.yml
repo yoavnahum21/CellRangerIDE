@@ -2,7 +2,9 @@
 
 ############# Option 1 ############
 # Required: 
-INCPM_link: https://stefan.weizmann.ac.il/users/ny/nyosef/20241127_LH00211_0190_B2252TLLT1/
+INCPM_link: 
+  - https://stefan.weizmann.ac.il/users/li/lireich/20241127_LH00211_0190_B2252TLLT1/
+  - https://stefan.weizmann.ac.il/users/li/lireich/20241127_LH00211_0189_A22555GLT1/
 
 # Default: File_Path/INCPM
 INCPM_directory: Default
@@ -11,19 +13,28 @@ INCPM_directory: Default
 # Required:
 fastq_path: 
   - /home/labs/nyosef/Collaboration/Shlomit_scGEX_Oct2023/231019_A00929_1107_BHLLWJDRX3/li/lireich/231019_A00929_1107_BHLLWJDRX3/AT_LP_EpCAM- #Add the path to the fastq files here 
-  - /home/labs/nyosef/Collaboration/Shlomit_scGEX_Oct2023/231019_A00929_1107_BHLLLWJDRX3/li/lireich/231019_A00929_1107_BHLLWJDRX3/CMO_AT_LP_EpCAM- #Add the path to the fastq files here
+  - /home/labs/nyosef/Collaboration/Shlomit_scGEX_Oct2023/231019_A00929_1107_BHLLWJDRX3/li/lireich/231019_A00929_1107_BHLLWJDRX3/CMO_AT_LP_EpCAM- #Add the path to the fastq files here
 
 # Default: refdata-gex-mm10-2020-Apwd
-alignment_ref_genome_file: Default
+alignment_ref_genome_file: /shareDB/CellRanger/refdata-gex-mm10-2020-A
+
+# Optional
+alignment_ref_vdj_file: /shareDB/CellRanger/refdata-cellranger-vdj-GRCh38-alts-ensembl-7.1.0
 
 # Required: true or false
 create_bam: true
+
+# Required: true or false
+include_introns: false
+
+# Optional
+expected_cell:
 
 # Required: usually named after the prefix in the fastqs files
 sample_name: 
   - B16
 
-# Required: (named after the fastqs folder)
+# Required: please add the prefix of the fastq files respectevly to the fastq_path order
 fastq_folders_name:
   - AT_LP_EpCAM
   - CMO_AT_LP_EpCAM
@@ -48,10 +59,10 @@ feature_types:
 
 # Required: (if feature_barcode was not given)
 hto_id:
-  -   #Add hashing ID 
-  -   #Add hashing ID 
-  -   #Add hashing ID 
-  -   #Add hashing ID
+  -  C0301 #Add hashing ID 
+  -  C0302 #Add hashing ID 
+  -  C0303 #Add hashing ID 
+  -  C0304 #Add hashing ID
 
 # Default: hto_names = hto_id 
 hto_names:
@@ -76,10 +87,10 @@ hto_pattern:
 
 # Required (if feature_reference_csv wasn't given)
 hto_sequence:
-  - AACCTTTGCCACTGC
-  - GTCCGACTAATAGCT
-  - CAGGTTGTTGTCATT
-  - TATTTCCACCCGGTC
+  - ACCCACCAGTAAGAC
+  - GGTCGAGAGCATTCA
+  - CTTGCCGCATGTCAT
+  - AAAGCATTCTTCACG
 
 # Default: Antibody Capture 
 HTO_feature_type:

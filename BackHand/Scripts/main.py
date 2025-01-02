@@ -13,8 +13,8 @@ def which_pipeline(pipeline_num) -> None:
         my_pipe.demultiplex()
     elif pipeline_num == 'mkref':
         my_pipe.make_custom_reference()
-    elif pipeline_num == '6':
-        return None
+    elif pipeline_num == 'cellbender':
+        my_pipe.cellbender()
     elif pipeline_num == '7':
         return None
     else: 
