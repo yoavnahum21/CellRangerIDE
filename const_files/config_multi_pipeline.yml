@@ -24,11 +24,19 @@ alignment_ref_vdj_file: /shareDB/CellRanger/refdata-cellranger-vdj-GRCh38-alts-e
 # Required: true or false
 create_bam: true
 
-# Required: true or false
+# Optional: true or false
 include_introns: false
 
-# Optional
+# Optional: int
 expected_cell:
+
+# Optional: int
+R1_gex_length:
+R2_gex_length:
+
+# Optional: int
+R1_vdj_length:
+R2_vdj_length:
 
 # Required: usually named after the prefix in the fastqs files
 sample_name: 
@@ -44,7 +52,7 @@ lanes_used:
   - Default
   - 
 
-# Required, options: 'feature_barcode' or 'cmo_barcode' (for now...)
+# Optional, options: 'feature_barcode' or 'cmo_barcode' (for now...)
 multiplexing_method: feature_barcode
 
 ################ Feature Barcode Section ################

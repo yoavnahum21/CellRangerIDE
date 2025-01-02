@@ -82,7 +82,7 @@ class pipeline:
             self.aligner_ref_genome_path     = config_selected_pipeline['alignment_ref_genome_file']
             self.create_bam                  = config_selected_pipeline['create_bam']
             self.aligner_ref_genome_path     = config_selected_pipeline['alignment_ref_genome_file']
-            self.expected_cell               = config_selected_pipeline['expected_cell']
+            self.expected_cells               = config_selected_pipeline['expected_cell']
             self.include_introns             = config_selected_pipeline['include_introns']
             if self.aligner_ref_genome_path  == None:
                 self.aligner_ref_genome_path = gex_reference_path
@@ -129,6 +129,10 @@ class pipeline:
                 self.sample_names                   = []
                 self.lanes_used                     = []
                 self.fastq_folders_name             = []
+                self.R1_gex_len                     = config_selected_pipeline['R1_gex_length']
+                self.R2_gex_len                     = config_selected_pipeline['R2_gex_length']
+                self.R1_vdj_len                     = config_selected_pipeline['R1_vdj_length']
+                self.R2_vdj_len                     = config_selected_pipeline['R2_vdj_length']
                 self.multiplexing_method            = config_selected_pipeline['multiplexing_method']
                 self.feature_reference_csv          = config_selected_pipeline['feature_reference_csv']
                 self.hto_id                         = config_selected_pipeline['hto_id']
@@ -491,10 +495,22 @@ OPTIONS:
             self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["create-bam", "true", None, None]], columns=col)], ignore_index=True)
         else:
             self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["create-bam", "false", None, None]], columns=col)], ignore_index=True)
+        if self.R1_gex_len is not None and self.R2_gex_len is not None:
+            self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["r1-length", self.R1_gex_len, None, None]], columns=col)], ignore_index=True)
+            self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["r2-length", self.R2_gex_len, None, None]], columns=col)], ignore_index=True)
+        if self.expected_cells is not None:
+            self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["expected-cells", self.expected_cells, None, None]], columns=col)], ignore_index=True)
+        if self.include_introns is not None:       
+            self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["include-introns", self.include_introns, None, None]], columns=col)], ignore_index=True)
+           
         if self.aligner_ref_vdj_path != None:
             self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([[None, None, None, None]], columns=col)], ignore_index=True)
             self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([['[vdj]', None, None, None]], columns=col)], ignore_index=True)
             self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([['reference', self.aligner_ref_vdj_path, None, None]], columns=col)], ignore_index=True)
+            if self.R1_vdj_len is not None and self.R2_vdj_len is not None:
+                self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["r1-length", self.R1_vdj_len, None, None]], columns=col)], ignore_index=True)
+                self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["r2-length", self.R2_vdj_len, None, None]], columns=col)], ignore_index=True)
+
         self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([[None, None, None, None]], columns=col)], ignore_index=True)
         self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([[None, None, None, None]], columns=col)], ignore_index=True)
         self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([['[libraries]', None, None, None]], columns=col)], ignore_index=True)
@@ -546,11 +562,11 @@ OPTIONS:
             f"""
 #BSUB -J make_multi
 #BSUB -q {self.queue}
-#BSUB -R rusage[mem=70G]
-#BSUB -R affinity[thread*5]
+#BSUB -R rusage[mem={self.total_memory_used}G]
+#BSUB -R affinity[thread*{jobs_number}]
 #BSUB -R "span[hosts=1]"
-#BSUB -oo {multi_log}_J%.log
-#BSUB -eo {multi_error_log}_J%.log 
+#BSUB -oo {multi_log}
+#BSUB -eo {multi_error_log} 
 
 sh {make_multi_path}
 

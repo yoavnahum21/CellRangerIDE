@@ -52,7 +52,7 @@ make_h5ads_path =                           os.path.join(OUTPUT_PATH, "make_h5ad
 demulti_path =                              os.path.join(OUTPUT_PATH, "demulti.sh")
 make_reference_path =                       os.path.join(OUTPUT_PATH, "make_ref.sh")
 basic_run_path =                            os.path.join(OUTPUT_PATH, "basic_run.sh")
-run_file_path =                             os.path.join(OUTPUT_PATH, "run.sh")
+run_file_path =                             os.path.join(OUTPUT_PATH, "run_on_wexac.sh")
 
 # Aligners
 DEFAULT_ALIGNER_PATH =                      "/apps/easybd/easybuild/amd/software/CellRanger/9.0.0/bin/cellranger"
@@ -70,10 +70,10 @@ custom_gtf_reference_path =                 os.path.join(CUSTOM_REF_PATH, "custo
 custom_fasta_reference_path =               os.path.join(CUSTOM_REF_PATH, "custom_ref.fasta")
 
 # Logs
-multi_log =                                 os.path.join(LOGS_PATH, "multi.log")
-multi_error_log =                           os.path.join(LOGS_PATH, "multi.err.log")
-demultiplex_log =                           os.path.join(LOGS_PATH, "deMULTIplex.log")
-demultiplex_error_log =                     os.path.join(LOGS_PATH, "deMULTIplex.err.log")
+multi_log =                                 os.path.join(LOGS_PATH, "multi_" + config['id'] + ".log")
+multi_error_log =                           os.path.join(LOGS_PATH, "multi_" + config['id'] + ".err.log")
+demultiplex_log =                           os.path.join(LOGS_PATH, "deMULTIplex_" + config['id'] + ".log")
+demultiplex_error_log =                     os.path.join(LOGS_PATH, "deMULTIplex_" + config['id'] + ".err.log")
 
 # Keys
 GENE_SYMBOLS_KEY =                          "gene_symbols"
