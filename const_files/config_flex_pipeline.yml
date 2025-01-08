@@ -1,0 +1,88 @@
+# This is the configuration file to run the cellranger pipeline which creates annotated data files for flex samples!
+
+############# Option 1: use INCPM link############
+# Required: 
+INCPM_link: 
+  -
+
+# Default: File_Path/INCPM
+INCPM_directory: 
+
+############# Option 2: fill the file manually ############
+# Required:
+fastq_path: 
+  -  #Add the path to the fastq files here 
+  -  #Add the path to the fastq files here
+
+# Default: refdata-gex-mm10-2020-Apwd
+alignment_ref_genome_file:  
+
+# Required: download your desired probe set file from the next link: https://www.10xgenomics.com/support/flex-gene-expression/documentation/steps/probe-sets/chromium-frp-probe-set-files#download-probe-files
+probe_set_path:
+
+# Required: true or false
+create_bam: 
+
+# Optional: true or false
+include_introns: 
+
+# Optional: int
+expected_cell: 
+
+# Required: usually named after the prefix in the fastqs files
+sample_name: 
+  - 
+  - 
+
+# Required: please add the prefix of the fastq files respectevly to the fastq_path order
+fastq_folders_name:
+  - 
+  - 
+
+# Default: any
+lanes_used: 
+  - 
+  - 
+
+# Optional, options: probe_barcode (for now...)
+multiplexing_method: 
+
+
+
+
+
+############# Probe barcode Section #################
+
+# Required, otherwise need to use fill the relevant attribuetes manually
+probe_barcode_csv: 
+
+
+
+
+## Manual Section
+# Required (if probe_barcode_csv wasn't given)
+sample_id_probe:
+  - 
+  - 
+  -
+  - 
+
+# Required (if probe_barcode_csv wasn't given)
+probe_barcode_ids:
+  - 
+  - 
+  - 
+  - 
+
+# Default: copied from sample_id
+probe_description:
+  - 
+  - 
+  - 
+  - 
+# End of Manual Section
+
+############# END OF Probe barcode Section #################
+
+##### Demultiplexing section #####
+##### End of Demultiplexing section ####

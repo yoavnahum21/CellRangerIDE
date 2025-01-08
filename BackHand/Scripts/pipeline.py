@@ -10,6 +10,7 @@ import scanpy as sc
 import anndata as ad
 import requests
 import subprocess
+import cellbenderPipe as cb 
 
 MEM_PER_TASK = 70
 CPUS_PER_TASK = 4
@@ -28,6 +29,7 @@ class pipeline:
             os.makedirs(CSV_PATH)
             os.makedirs(FASTQ_PATH)
             os.makedirs(CUSTOM_REF_PATH)
+            os.makedirs(LOGS_PATH)
             os.makedirs(FASTQC_PATH)
             os.makedirs(H5_PATH)
             os.makedirs(H5ADS_PATH)
@@ -44,15 +46,7 @@ class pipeline:
         
         self.pipeline                   = config['pipeline']
 
-        self.donor                      = config['donor']
-
-        self.seq_run                    = config['seq_run']
-
         self.id                         = config['id']
-
-        self.output_destination         = config['output_destination']
-        if self.output_destination      == None:
-            self.output_destinatxion    = OUTPUT_PATH
         
         self.running_machine            = config['running_machine']
         if self.running_machine         == 'Default':
@@ -81,20 +75,24 @@ class pipeline:
         elif self.pipeline                   == "multi":
             self.aligner_ref_genome_path     = config_selected_pipeline['alignment_ref_genome_file']
             self.create_bam                  = config_selected_pipeline['create_bam']
-            self.aligner_ref_genome_path     = config_selected_pipeline['alignment_ref_genome_file']
             self.expected_cells               = config_selected_pipeline['expected_cell']
             self.include_introns             = config_selected_pipeline['include_introns']
-            if self.aligner_ref_genome_path  == None:
+            self.R1_gex_len                     = config_selected_pipeline['R1_gex_length']
+            self.R2_gex_len                     = config_selected_pipeline['R2_gex_length']
+            self.R1_vdj_len                     = config_selected_pipeline['R1_vdj_length']
+            self.R2_vdj_len                     = config_selected_pipeline['R2_vdj_length']
+            if self.aligner_ref_genome_path  == 'Default':
                 self.aligner_ref_genome_path = gex_reference_path
             self.aligner_ref_vdj_path        = config_selected_pipeline['alignment_ref_vdj_file']
             self.sample_sheet                = config_selected_pipeline['INCPM_link']
-            if self.sample_sheet             == None:
+            if self.sample_sheet[0]           == None:
                 self.fastq_path                     = config_selected_pipeline['fastq_path']
                 self.multiplexing_method            = config_selected_pipeline['multiplexing_method']
                 self.fastq_folders_name             = config_selected_pipeline['fastq_folders_name']
+                self.sample_names                   = config_selected_pipeline['sample_name']
                 self.lanes_used                     = config_selected_pipeline['lanes_used']
                 if self.lanes_used[0]               == 'Default':
-                    self.lanes_used                 =  ['any'] * len(self.lanes_used)
+                    self.lanes_used                 =  ['any'] * len(self.sample_names)
                 self.feature_types                  = config_selected_pipeline['feature_types']
                 if self.multiplexing_method         == "feature_barcode":
                     self.feature_reference_csv      = config_selected_pipeline['feature_reference_csv']
@@ -129,10 +127,6 @@ class pipeline:
                 self.sample_names                   = []
                 self.lanes_used                     = []
                 self.fastq_folders_name             = []
-                self.R1_gex_len                     = config_selected_pipeline['R1_gex_length']
-                self.R2_gex_len                     = config_selected_pipeline['R2_gex_length']
-                self.R1_vdj_len                     = config_selected_pipeline['R1_vdj_length']
-                self.R2_vdj_len                     = config_selected_pipeline['R2_vdj_length']
                 self.multiplexing_method            = config_selected_pipeline['multiplexing_method']
                 self.feature_reference_csv          = config_selected_pipeline['feature_reference_csv']
                 self.hto_id                         = config_selected_pipeline['hto_id']
@@ -221,8 +215,118 @@ f"wget --no-check-certificate {incpm_link[i]}SampleSheet.csv --output-document={
                                 ) 
                     os.system(copy_process_fastqs)
 
-            
+        elif self.pipeline                   == "flex":
+            self.aligner_ref_genome_path     = config_selected_pipeline['alignment_ref_genome_file']
+            self.create_bam                  = config_selected_pipeline['create_bam']
+            self.probe_set_path              = config_selected_pipeline['probe_set_path']
+            self.expected_cells              = config_selected_pipeline['expected_cell']
+            self.include_introns             = config_selected_pipeline['include_introns']
+            if self.aligner_ref_genome_path  == 'Default':
+                self.aligner_ref_genome_path = gex_reference_path
+            self.sample_sheet                = config_selected_pipeline['INCPM_link']
+            if self.sample_sheet[0]          == None:          # if INCPM link wasn't given
+                self.fastq_path                     = config_selected_pipeline['fastq_path']
+                self.multiplexing_method            = config_selected_pipeline['multiplexing_method']
+                self.fastq_folders_name             = config_selected_pipeline['fastq_folders_name']
+                self.sample_names                   = config_selected_pipeline['sample_name']
+                self.lanes_used                     = config_selected_pipeline['lanes_used']
+                if self.lanes_used[0]               == 'Default':
+                    self.lanes_used                 =  ['any'] * len(self.sample_names)
+
+
+                if self.multiplexing_method         == "probe_barcode":
+                    self.probe_barcode_csv            = config_selected_pipeline['probe_barcode_csv']
+                    if self.probe_barcode_csv         == None:
+                        self.sample_id_probe          = config_selected_pipeline['sample_id_probe']
+                        self.probe_barcode_ids        = config_selected_pipeline['probe_barcode_ids']
+                        self.probe_description        = config_selected_pipeline['probe_description']
+
+            else:           ##### TBD!!!!
+                incpm_path                          = config_selected_pipeline['INCPM_directory']
+                if incpm_path                       == 'Default':
+                    incpm_path                      = INCPM_PATH
+                incpm_link                          = config_selected_pipeline['INCPM_link']
+                self.sample_names                   = []
+                self.lanes_used                     = []
+                self.fastq_folders_name             = []
+                self.multiplexing_method            = config_selected_pipeline['multiplexing_method']
+                self.feature_types                  = []
+                self.fastq_path                     = []
+                feautre_type_list                   = ["gene expression","Antibody Capture","CRISPR Guide Capture","Multiplexing Capture","VDJ-B","VDJ-T","VDJ-T-GD","Antigen Capture #5' Antigen Capture only"]    
+                for i in range(len(incpm_link)):
+                    self.sample_sheet_path              = os.path.join(SAMPLE_SHEET_INCPM_PATH, "SampleSheet" + str(i+1) + ".csv")
+                    copy_process_samplesheet            = os.path.join(SAMPLE_SHEET_INCPM_PATH, "copy_samplesheet" + str(i+1) + ".sh")
+                    with open(copy_process_samplesheet, "w+") as f:
+                        f.write(
+f"wget --no-check-certificate {incpm_link[i]}SampleSheet.csv --output-document={self.sample_sheet_path}"
+                    )
+                    os.system(copy_process_samplesheet)
+
+                    #### patch if csv is not valid ###
+                    with open(self.sample_sheet_path, "r") as f:
+                        tmp_csv_file = f.readlines()
+                    
+                    comma_max_count = 0
+                    for row in tmp_csv_file:
+                        comma_count = row.count(",")
+                        if comma_count > comma_max_count:
+                            comma_max_count = comma_count
+
+                    phase = 0
+                    for index, row in enumerate(tmp_csv_file):
+                        row =  row[:-1] + ","*(comma_max_count-row.count(",")) + "\n"
+                        if row.split(",")[1]:
+                            phase += 1
+                            continue
+                        tmp_csv_file[index - phase] = row
+                    
+                    with open(self.sample_sheet_path, "w") as f:
+                        f.writelines(tmp_csv_file)
+
+                    #### end of patch ###
+                    self.sample_sheet                   = pd.read_csv(self.sample_sheet_path)
+                    samplesheet_relevant_index          = self.sample_sheet[self.sample_sheet.isin(['Sample_ID']).any(axis=1)].index[0]
+                    df                                  = self.sample_sheet.iloc[samplesheet_relevant_index+1:].reset_index(drop=True)
+                    self.lanes_used                     += df.iloc[:,0].tolist()
+                    self.sample_names                   += df.iloc[:,1].tolist()
+                    self.fastq_folders_name             += df.iloc[:,1].tolist()
+
+
+                answer = str(input("Do you wish to use all libraries ??y/n\n"))
+                while (answer == 'n' or answer == 'N'):
+                    print("which library would you like to remove")               
+                    for index, library in enumerate(self.fastq_folders_name):
+                        print(str(index + 1)+". " + library)
+                    rm_elem = int(input())
+                    self.lanes_used.pop(rm_elem-1)
+                    self.sample_names.pop(rm_elem-1)
+                    self.fastq_folders_name.pop(rm_elem-1)
+                    answer = str(input("what about now, do you wish to use all libraries??y/n\n"))
+                print("keep going on with the next list")
+
+                for index, library in enumerate(self.fastq_folders_name):
+                    print(str(index + 1)+". " + library)
+                
+                for sample in self.sample_names:
+                    self.fastq_path.append(f"{FASTQ_INCPM_PATH}/{sample}/")
+                    print(f"which feautre type would you like to use for the sample: {sample}")
+                    type = int(input("1.Gene Expression\n2.Antibody Capture\n3.CRISPR Guide Capture\n4.Multiplexing Capture\n5.VDJ-B\n6.VDJ-T\n7.VDJ-T-GD\n8.Antigen Capture #5' Antigen Capture only\n"))
+                    self.feature_types.append(feautre_type_list[type-1])
+                copy_process_fastqs                 = os.path.join(FASTQ_INCPM_PATH, "copy_fastq.sh")
+                if not os.listdir(FASTQ_INCPM_PATH):
+                    for link in incpm_link:
+                        for sample in self.sample_names:
+                            with open(copy_process_fastqs, "a") as f:
+                                f.write(
+    f'wget -r -np -nd -A "*.fastq.gz" --no-check-certificate {link}{sample}/ -P {FASTQ_INCPM_PATH}/{sample}/\n'
+                                ) 
+                    os.system(copy_process_fastqs)
+
+        
+
+
             # one day the rest of the options will be implemented as well
+        
         elif self.pipeline                   == "mkref":
             self.original_fasta_file_path    = config_selected_pipeline['original_fasta_file_path']
             self.customized_fasta_file_path  = config_selected_pipeline['customized_fasta_file_path']
@@ -233,8 +337,7 @@ f"wget --no-check-certificate {incpm_link[i]}SampleSheet.csv --output-document={
             self.filter_gtf_attribute        = config_selected_pipeline['filter_gtf_attribute']
             self.genome_name                 = config_selected_pipeline['genome_name']
 
-
-        elif self.pipeline                      == "demulti":
+        elif self.pipeline                   == "demulti":
             self.demultiplex_method             = config_selected_pipeline['demultiplex_method']
             self.adata_path                     = config_selected_pipeline['adata_path']
             self.sample_names                   = config_selected_pipeline['sample_names']
@@ -243,13 +346,17 @@ f"wget --no-check-certificate {incpm_link[i]}SampleSheet.csv --output-document={
             for index, sample in enumerate(self.sample_names):
                 self.sample_id_to_expected_barcodes.update({sample: self.hto_list_per_sample[index]})
 
-
         elif self.pipeline                   == "vdj":
             pass
 
-
         elif self.pipeline                   == "aggr":
             pass
+        
+        elif self.pipeline                   == "cellbender":
+            self.cellbender_shell = CELLBENDER_SHELL_RUNNER
+            self.device = cb.check_cuda_availability()
+            self.data_path = config_selected_pipeline['data_path']
+            self.donor_list = [d for d in os.listdir(self.data_path) if os.path.isdir(os.path.join(self.data_path, d))]
 
         # Runtime parameters
 
@@ -528,7 +635,7 @@ OPTIONS:
             self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([variable_samples_names], columns=col)], ignore_index=True)
             samples_data_df = pd.DataFrame(variable_samples_list, columns=col)
             self.multi_csv = pd.concat([self.multi_csv, samples_data_df], ignore_index=True)
-            self.multi_csv.to_csv(MULTI_CSV_PATH, header=False, index=False)
+            self.multi_csv.to_csv(MULTI_CSV_PATH, header=False, index=False)    
         elif (self.multiplexing_method == 'feature_barcode'):
             self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([['[feature]', None, None, None]], columns=col)], ignore_index=True)
             if(self.feature_reference_csv != 'Default'):
@@ -547,11 +654,11 @@ OPTIONS:
             f.write(
             f"""#!/usr/bin/bash
     
-{self.aligner_software_path} multi\
---id={self.id}\
---csv={MULTI_CSV_PATH}\
---maxjobs={self.jobs_number}\
---localcores={self.cpus_number}\
+{self.aligner_software_path} multi \
+--id={self.id} \
+--csv={MULTI_CSV_PATH} \
+--maxjobs={self.jobs_number} \
+--localcores={self.cpus_number} \
 --localmem={self.total_memory_used}
 
             """ 
@@ -563,7 +670,7 @@ OPTIONS:
 #BSUB -J make_multi
 #BSUB -q {self.queue}
 #BSUB -R rusage[mem={self.total_memory_used}G]
-#BSUB -R affinity[thread*{jobs_number}]
+#BSUB -R affinity[thread*{self.jobs_number}]
 #BSUB -R "span[hosts=1]"
 #BSUB -oo {multi_log}
 #BSUB -eo {multi_error_log} 
@@ -692,4 +799,93 @@ OPTIONS:
             )
 
     def cellbender(self):
-        pass
+
+        for donor in self.donor_list:
+            save_dir = os.path.join(self.data_path, donor)
+            if not os.path.exists(save_dir):
+                os.makedirs(save_dir)
+            result = cb.run_cellbender_shell(donor, self.data_path, self.cellbender_shell)
+            if not result:
+                print("Error encountered, stopping further execution.")
+                break
+            else:
+                try:
+                    cb.save_files_locally(donor, self.data_path, save_dir)
+                except Exception as e:
+                    print(f"Failed to save files for donor {donor}: {e}")
+
+    
+    def multi_flex(self):
+        
+        self.multi_csv = pd.DataFrame(columns=['[gene-expression]',None, None, None])
+        col = ['[gene-expression]',None, None, None]
+        self.multi_csv.loc[0] = ['reference',None, None, None]
+        row_reference_index = self.multi_csv[self.multi_csv.iloc[:, 0] == 'reference'].index[0]
+        self.multi_csv.iloc[row_reference_index, 1] = self.aligner_ref_genome_path
+        self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["probe-set", self.probe_set_path, None, None]], columns=col)], ignore_index=True)
+
+        if self.create_bam is True:
+            self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["create-bam", "true", None, None]], columns=col)], ignore_index=True)
+        else:
+            self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["create-bam", "false", None, None]], columns=col)], ignore_index=True)
+        if self.expected_cells is not None:
+            self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["expected-cells", self.expected_cells, None, None]], columns=col)], ignore_index=True)
+        if self.include_introns is not None:       
+            self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["include-introns", self.include_introns, None, None]], columns=col)], ignore_index=True)
+           
+
+        self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([[None, None, None, None]], columns=col)], ignore_index=True)
+        self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([[None, None, None, None]], columns=col)], ignore_index=True)
+        self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([['[libraries]', None, None, None]], columns=col)], ignore_index=True)
+        variable_libraries_names = ['fastq_id', 'fastqs', 'lanes', 'feature_types']
+        variable_libraries_lists = list(zip(self.sample_names, self.fastq_path, self.lanes_used, self.feature_types))
+        self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([variable_libraries_names], columns=col)], ignore_index=True)
+        library_data_df = pd.DataFrame(variable_libraries_lists, columns=col)
+        self.multi_csv = pd.concat([self.multi_csv, library_data_df], ignore_index=True)
+        self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([[None, None, None, None]], columns=col)], ignore_index=True)
+        self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([[None, None, None, None]], columns=col)], ignore_index=True)
+        if (self.multiplexing_method == 'probe_barcode'):
+            if self.probe_barcode_csv   ==  None:
+                self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([['[samples]', None, None, None]], columns=col)], ignore_index=True)
+                variable_samples_names = ['sample_id', 'probe_barcode_ids', 'description', None]
+                variable_samples_list  = list(zip(self.sample_id_probe,self.probe_barcode_ids, self.probe_description,[None] * len(self.sample_id_probe)))
+                self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([variable_samples_names], columns=col)], ignore_index=True)
+                samples_data_df = pd.DataFrame(variable_samples_list, columns=col)
+                self.multi_csv = pd.concat([self.multi_csv, samples_data_df], ignore_index=True)
+            else:
+                pass #TBD, concatinate the csv file content into the self.multi_csv content.
+                
+        self.multi_csv.to_csv(MULTI_CSV_PATH, index=False)
+
+        with open(make_multi_path, "w+") as f:
+            f.write(
+            f"""#!/usr/bin/bash
+        {self.aligner_software_path} multi \
+--id={self.id} \
+--csv={MULTI_CSV_PATH} \
+--maxjobs={self.jobs_number} \
+--localcores={self.cpus_number} \
+--localmem={self.total_memory_used}
+
+            """ 
+            )
+        if self.running_machine == "Wexac":
+            with open(run_file_path, "w+") as g:
+                g.write(
+            f"""
+#BSUB -J make_multi
+#BSUB -q {self.queue}
+#BSUB -R rusage[mem={self.total_memory_used}G]
+#BSUB -R affinity[thread*{self.jobs_number}]
+#BSUB -R "span[hosts=1]"
+#BSUB -oo {multi_log}
+#BSUB -eo {multi_error_log} 
+
+sh {make_multi_path}
+
+            """
+
+            )
+    
+
+        

@@ -87,5 +87,8 @@ ANTIBODY_KEY =                              "Antibody Capture"
 CLASSIFICATION_KEY =                        "Classification"
 
 # Program runner
+R_RUNNER =                                  "/apps/easybd/easybuild/amd/software/R/4.4.1-gfbf-2023b/bin/Rscript"
 
-R_RUNNER =                                  "/home/labs/nyosef/yoavnah/miniconda3/envs/yoav_env/envs/r_env/bin/Rscript"
+# Cellbender runner files path
+CELLBENDER_PYTHON_RUNNER =                  "/home/labs/nyosef/yoavnah/CellRangerIDE/BackHand/Scripts/cellbender.py"
+CELLBENDER_SHELL_RUNNER  =                  "/home/labs/nyosef/yoavnah/CellRangerIDE/BackHand/Scripts/run_cellbender.sh"

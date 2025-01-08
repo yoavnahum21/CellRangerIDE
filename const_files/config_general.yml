@@ -1,51 +1,39 @@
 # This is the configuration file to run the cellranger pipeline on the Weizmann cluster/ AWS S3
 
 # Required:
-project_name: giacococmo2
+project_name: pac
 
 # Required:
-id: liver
+id: 10_BCMA_CART
 
 # Required: Choose your pipeline!
-pipeline: multi
-
-# Default: project_name/Output_Files
-output_destination: Default                                                                                                                                                            
-
-# Required:
-weizmann_user: yoavnah                                                                                          
-
+pipeline: cellbender
+                                                                                                                                            
 # Optional:
 Sample_sheet_address:
 
 # Default: /apps/RH7U2/general/cellranger/7.1.0/cellranger
 aligner_software_path: 
 
-# Default: /home/labs/nyosef/yoavnah/CellRangerIDE/Projects/yoav/OutputFiles/{id}_cellrangerpipe.sh
-shell_file: Default
-
 # Default: Designated to Wexac
 running_machine: Default
-
-# Optional:
-donor: 591C                                                                                                     
-
-# Optional:
-seq_run: 003 
-
-# Optional: if you are not using AWS s3 this one is not necessary
+                                                                                                    
+# TBD: if you are not using AWS s3 this one is not necessary
 s3_access_file:                                                                                                                                                         
 
-# Runtime parameters
+
+
+
+
+# Runtime parameters set to be nominal runtime on wexac
+# Required
+jobs_number: 5
 
 # Required
-jobs_number: 10
-
-# Required
-cpus_number: 5
+cpus_number: 1
 
 # Required (in GB)
 total_memory_used: 70 
 
-# Required
+# Required (only for wexac)
 queue: long

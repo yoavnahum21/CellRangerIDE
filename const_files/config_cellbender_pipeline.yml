@@ -1,0 +1,5 @@
+# This is the configuration file to run the cellbender pipeline whose purpose is removing background noises from h5ad
+
+# Required: the path of the h5's directory is needed
+data_path: /home/labs/nyosef/yoavnah/CellRangerIDE/Projects/giacococmo/OutputFiles/output/liver/outs/per_sample_outs/liver/count
+
