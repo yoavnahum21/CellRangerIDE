@@ -60,6 +60,7 @@ DEFAULT_ALIGNER_PATH =                      "/apps/easybd/easybuild/amd/software
 # csv format executing file
 MULTI_TEMPLATE_CSV_PATH =                   os.path.join(CONST_PATH, "multi_template.csv")
 MULTI_CSV_PATH =                            os.path.join(CSV_PATH, "multi.csv")
+MULTI_FLEX_CSV_PATH =                       os.path.join(CSV_PATH, "multi_flex.csv")
 samplesheet_path =                          os.path.join(CSV_PATH,"samplesheet.csv")
 feature_reference_path =                    os.path.join(CSV_PATH,"feature_reference.csv")
 
@@ -87,7 +88,7 @@ ANTIBODY_KEY =                              "Antibody Capture"
 CLASSIFICATION_KEY =                        "Classification"
 
 # Program runner
-R_RUNNER =                                  "/apps/easybd/easybuild/amd/software/R/4.4.1-gfbf-2023b/bin/Rscript"
+R_RUNNER =                                  "" # Currently there is no Rscript binary file that can be loaded from wexac
 
 # Cellbender runner files path
 CELLBENDER_PYTHON_RUNNER =                  "/home/labs/nyosef/yoavnah/CellRangerIDE/BackHand/Scripts/cellbender.py"

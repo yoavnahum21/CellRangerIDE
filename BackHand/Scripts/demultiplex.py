@@ -3,7 +3,7 @@ import os
 import scanpy as sc
 import pandas as pd
 import subprocess
-from _utils import CSV_PATH, R_RUNNER, OUTPUT_PATH, DEMULTIPLEXED_H5ADS_PATH
+from _utils import CSV_PATH, R_RUNNER, OUTPUT_PATH, DEMULTIPLEXED_H5ADS_PATH, LOGS_PATH
 from ridgeplot import ridgeplot
 from typing import List
 import numpy as np
@@ -102,13 +102,21 @@ write.csv(res_mtx_df, '{os.path.join(DEMULTIPLEXED_H5ADS_PATH, 'res_mtx_df_deMUL
 write.csv(final_assign_df, '{os.path.join(DEMULTIPLEXED_H5ADS_PATH, 'final_assign_deMULTIplex2.csv')}')
 write.csv(coefs, '{os.path.join(DEMULTIPLEXED_H5ADS_PATH, 'coefs_deMULTIplex2.csv')}')
 
-"""
+""" 
         )
-    with open("/home/labs/nyosef/yoavnah/CellRangerIDE/Projects/Oier/File_Path/h5ads/demultiplexed/deMULTIplex_log.log", "w+") as g:
-        process = subprocess.Popen([f"{R_RUNNER}", f"{r_script_file}"],
-                                   stdout= g,
-                                   stderr= subprocess.STDOUT)
-        process.wait() 
+
+    stdout_log_path = os.path.join(LOGS_PATH, 'deMULTIplex_log.log')
+    stderr_log_path = os.path.join(LOGS_PATH, 'deMULTIplex_log.err.log')
+
+    # Open the log files
+    with open(stdout_log_path, "w") as stdout_file, open(stderr_log_path, "w") as stderr_file:
+    # Run the subprocess
+        process = subprocess.Popen(
+            [f"{R_RUNNER}", f"{r_script_file}"],
+            stdout=stdout_file,  # Pass the opened file object, not the path
+            stderr=stderr_file   # Pass the opened file object, not the path
+        )
+        process.wait()
         
     mask = pd.read_csv(os.path.join(DEMULTIPLEXED_H5ADS_PATH, 'final_assign_deMULTIplex2.csv'))
     for i in range(len(adata.obs)):

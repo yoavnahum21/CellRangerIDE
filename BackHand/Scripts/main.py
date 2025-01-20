@@ -18,11 +18,12 @@ def which_pipeline(pipeline_num) -> None:
     elif pipeline_num == 'flex':
         return my_pipe.multi_flex()
     else: 
-        print("Your choise is not valid!!!\nPlz choose another pip3line :P ")
+        print("Your choice is not valid!!!\nPlz choose another pip3line :P ")
     return None
 
 
 my_pipe = pipeline()
 
 which_pipeline(my_pipe.pipeline)
+print("Files were generated successfully")
 print("Ciao!")

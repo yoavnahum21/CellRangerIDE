@@ -6,7 +6,7 @@ INCPM_link:
   -
 
 # Default: File_Path/INCPM
-INCPM_directory: 
+INCPM_directory: Default
 
 ############# Option 2: fill the file manually ############
 # Required:
@@ -15,10 +15,10 @@ fastq_path:
   -  #Add the path to the fastq files here
 
 # Default: refdata-gex-mm10-2020-Apwd
-alignment_ref_genome_file:  
+alignment_ref_genome_file: Default
 
 # Required: download your desired probe set file from the next link: https://www.10xgenomics.com/support/flex-gene-expression/documentation/steps/probe-sets/chromium-frp-probe-set-files#download-probe-files
-probe_set_path:
+probe_set_path: 
 
 # Required: true or false
 create_bam: 

@@ -1,11 +1,11 @@
 adata_path:
-  - /home/labs/nyosef/yoavnah/CellRangerIDE/Projects/Oier/OutputFiles/AT_EPi/outs/per_sample_outs/AT_EPi/count/sample_filtered_feature_bc_matrix.h5
+  - /home/labs/nyosef/yoavnah/CellRangerIDE/Projects/giaco/OutputFiles/Liver_1/outs/multi/count/raw_feature_bc_matrix.h5
 
 sample_names:
-  - AT_EPi
+  - Liver_1
 
 hto_list_per_sample: # Pay attention that the lenght of the list compatible to the sample_name list
-  - ['AT_Epi_Naive2', 'AT_Epi_Naive3', 'AT_Epi_Act147', 'AT_Epi_Act150']
+  - ['IKK_RORc_Ko_m1_median_lobe', 'IKK_RORc_KO_m1_left_lobe', 'IKK_RORc_KO_m2_median_lobe', 'IKK_RORc_KO_m2_left_lobe']
 
 demultiplex_method: demultiplex2 # hashsolo or demultiplex2
 

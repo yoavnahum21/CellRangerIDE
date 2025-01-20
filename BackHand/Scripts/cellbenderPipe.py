@@ -22,45 +22,49 @@ def check_cuda_availability():
         logging.info("CUDA is not available. Using CPU instead.")
     return device
 
-def run_cellbender_shell(donor, base_data_dir, script_sh):
-    # Construct file path to metrics summary CSV
-    data_dir = os.path.join(base_data_dir, donor)
-    file_pattern = os.path.join(data_dir, "metrics_summary.csv")
-    
-    # Read CSV file and extract expectedCell value
-    try:
-        df = pd.read_csv(file_pattern)
-        print("DataFrame read from CSV:")
-        print(df)
-        # Extract the 'Metric Value' where 'Metric Name' is 'Cells'
-        expectedCell = df.loc[df['Metric Name'] == 'Cells', 'Metric Value'].values[0]
-        print(f"Extracted expectedCell value: {expectedCell}")
-        # Remove commas from the expectedCell value
-        expectedCell = int(expectedCell.replace(',', ''))
-        print(f"Processed expectedCell value: {expectedCell}")
-    except Exception as e:
-        print(f"Error reading expectedCell from CSV: {e}")
-        return False
-    
-    script_path = script_sh
-    
-    # Command to execute the shell script
-    command = [
-        "bash",
-        script_path,
-        donor,
-        base_data_dir,
-        str(expectedCell),  
-    ]
+def run_cellbender_shell(donor, base_data_dir, script_sh, pipeline_used):
+    data_dir = base_data_dir
+    if pipeline_used == 'count':
+        # Construct file path to metrics summary CSV
+        
+        file_pattern = os.path.join(data_dir, "metrics_summary.csv")
+        
+        # Read CSV file and extract expectedCell value
+        try:
+            df = pd.read_csv(file_pattern)
+            print("DataFrame read from CSV:")
+            print(df)
+            # Extract the 'Metric Value' where 'Metric Name' is 'Cells'
+            expectedCell = df.loc[df['Metric Name'] == 'Cells', 'Metric Value'].values[0]
+            print(f"Extracted expectedCell value: {expectedCell}")
+            # Remove commas from the expectedCell value
+            expectedCell = int(expectedCell.replace(',', ''))
+            print(f"Processed expectedCell value: {expectedCell}")
+        except Exception as e:
+            print(f"Error reading expectedCell from CSV: {e}")
+            return False
+        
+        script_path = script_sh
+        
+        # Command to execute the shell script
+        command = [
+            "bash",
+            script_path,
+            donor,
+            base_data_dir,
+            str(expectedCell),  
+        ]
 
-    print(f"Running shell script for donor {donor}...")
-    try:
-        subprocess.run(command, check=True)
-        print(f"Successfully ran shell script for donor {donor}")
-        return True
-    except subprocess.CalledProcessError as e:
-        print(f"Error running shell script for donor {donor}: {e}")
-        return False
+        print(f"Running shell script for donor {donor}...")
+        try:
+            subprocess.run(command, check=True)
+            print(f"Successfully ran shell script for donor {donor}")
+            return True
+        except subprocess.CalledProcessError as e:
+            print(f"Error running shell script for donor {donor}: {e}")
+            return False
+    if pipeline_used == 'multi':
+        file_pattern = os.path.join(data_dir, "metrics_summary.csv")
 
 def save_files_locally(donor, base_data_dir, save_dir):
     data_dir = os.path.join(base_data_dir, donor)

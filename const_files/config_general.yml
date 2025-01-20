@@ -1,13 +1,13 @@
 # This is the configuration file to run the cellranger pipeline on the Weizmann cluster/ AWS S3
 
 # Required:
-project_name: pac
+project_name: giaco
 
 # Required:
-id: 10_BCMA_CART
+id: liver3
 
 # Required: Choose your pipeline!
-pipeline: cellbender
+pipeline: demulti
                                                                                                                                             
 # Optional:
 Sample_sheet_address:

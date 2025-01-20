@@ -9,7 +9,7 @@ expectedCell=$3  # Additional argument for expectedCell
 data_dir="${base_data_dir}/${donor}"
 
 # Find the sample_raw_feature_bc_matrix.h5 file in subdirectories
-input=$(find "$data_dir" -name "sample_raw_feature_bc_matrix.h5" | head -n 1)
+input=$(find "$data_dir" -name "raw_feature_bc_matrix.h5" | head -n 1)
 
 # Check if the file was found
 if [ -z "$input" ]; then

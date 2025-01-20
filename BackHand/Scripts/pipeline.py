@@ -67,7 +67,6 @@ class pipeline:
             self.aligner_ref_genome_path     = config_selected_pipeline['alignment_ref_genome_file']
             if self.aligner_ref_genome_path  == None:
                 self.aligner_ref_genome_path = gex_reference_path
-            self.aligner_ref_vdj_path        = config_selected_pipeline['alignment_ref_vdj_file']
             self.fastq_path                  = config_selected_pipeline['BCL_path']
             self.sample_name                 = config_selected_pipeline['sample_name']
             # one day the rest of the options will be implemented as well
@@ -84,6 +83,8 @@ class pipeline:
             if self.aligner_ref_genome_path  == 'Default':
                 self.aligner_ref_genome_path = gex_reference_path
             self.aligner_ref_vdj_path        = config_selected_pipeline['alignment_ref_vdj_file']
+            if self.aligner_ref_vdj_path     == 'Default':
+                self.aligner_ref_vdj_path    = vdj_reference_path  
             self.sample_sheet                = config_selected_pipeline['INCPM_link']
             if self.sample_sheet[0]           == None:
                 self.fastq_path                     = config_selected_pipeline['fastq_path']
@@ -356,8 +357,7 @@ f"wget --no-check-certificate {incpm_link[i]}SampleSheet.csv --output-document={
             self.cellbender_shell = CELLBENDER_SHELL_RUNNER
             self.device = cb.check_cuda_availability()
             self.data_path = config_selected_pipeline['data_path']
-            self.donor_list = [d for d in os.listdir(self.data_path) if os.path.isdir(os.path.join(self.data_path, d))]
-
+            self.chosen_pipeline = config_selected_pipeline['chosen_pipeline']
         # Runtime parameters
 
         self.cpus_number                = config['cpus_number']
@@ -606,7 +606,7 @@ OPTIONS:
             self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["r1-length", self.R1_gex_len, None, None]], columns=col)], ignore_index=True)
             self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["r2-length", self.R2_gex_len, None, None]], columns=col)], ignore_index=True)
         if self.expected_cells is not None:
-            self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["expected-cells", self.expected_cells, None, None]], columns=col)], ignore_index=True)
+            self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["expect-cells", self.expected_cells, None, None]], columns=col)], ignore_index=True)
         if self.include_introns is not None:       
             self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["include-introns", self.include_introns, None, None]], columns=col)], ignore_index=True)
            
@@ -675,7 +675,7 @@ OPTIONS:
 #BSUB -oo {multi_log}
 #BSUB -eo {multi_error_log} 
 
-sh {make_multi_path}
+bash {make_multi_path} {OUTPUT_PATH}
 
             """
 
@@ -799,20 +799,21 @@ OPTIONS:
             )
 
     def cellbender(self):
-
-        for donor in self.donor_list:
-            save_dir = os.path.join(self.data_path, donor)
+            
+            base_directory = os.path.basename(self.data_path)
+            save_dir = os.path.join(base_directory, "cellbender")
             if not os.path.exists(save_dir):
                 os.makedirs(save_dir)
-            result = cb.run_cellbender_shell(donor, self.data_path, self.cellbender_shell)
+            result = cb.run_cellbender_shell(base_directory, self.data_path, self.cellbender_shell, self.chosen_pipeline)
             if not result:
                 print("Error encountered, stopping further execution.")
-                break
+                return
             else:
                 try:
-                    cb.save_files_locally(donor, self.data_path, save_dir)
+                    cb.save_files_locally(base_directory, self.data_path, save_dir)
                 except Exception as e:
-                    print(f"Failed to save files for donor {donor}: {e}")
+                    print(f"Failed to save files for donor {base_directory}: {e}")
+            return
 
     
     def multi_flex(self):
@@ -829,7 +830,7 @@ OPTIONS:
         else:
             self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["create-bam", "false", None, None]], columns=col)], ignore_index=True)
         if self.expected_cells is not None:
-            self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["expected-cells", self.expected_cells, None, None]], columns=col)], ignore_index=True)
+            self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["expect-cells", self.expected_cells, None, None]], columns=col)], ignore_index=True)
         if self.include_introns is not None:       
             self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["include-introns", self.include_introns, None, None]], columns=col)], ignore_index=True)
            
@@ -838,7 +839,8 @@ OPTIONS:
         self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([[None, None, None, None]], columns=col)], ignore_index=True)
         self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([['[libraries]', None, None, None]], columns=col)], ignore_index=True)
         variable_libraries_names = ['fastq_id', 'fastqs', 'lanes', 'feature_types']
-        variable_libraries_lists = list(zip(self.sample_names, self.fastq_path, self.lanes_used, self.feature_types))
+        feature_types = ['Gene Expression'] * len(self.sample_names)
+        variable_libraries_lists = list(zip(self.sample_names, self.fastq_path, self.lanes_used, feature_types))
         self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([variable_libraries_names], columns=col)], ignore_index=True)
         library_data_df = pd.DataFrame(variable_libraries_lists, columns=col)
         self.multi_csv = pd.concat([self.multi_csv, library_data_df], ignore_index=True)
@@ -853,16 +855,17 @@ OPTIONS:
                 samples_data_df = pd.DataFrame(variable_samples_list, columns=col)
                 self.multi_csv = pd.concat([self.multi_csv, samples_data_df], ignore_index=True)
             else:
-                pass #TBD, concatinate the csv file content into the self.multi_csv content.
-                
-        self.multi_csv.to_csv(MULTI_CSV_PATH, index=False)
+                self.multi_csv = pd.concat([self.multi_csv, self.probe_barcode_csv], ignore_index=True)
+
+
+        self.multi_csv.to_csv(MULTI_FLEX_CSV_PATH, index=False)
 
         with open(make_multi_path, "w+") as f:
             f.write(
             f"""#!/usr/bin/bash
         {self.aligner_software_path} multi \
 --id={self.id} \
---csv={MULTI_CSV_PATH} \
+--csv={MULTI_FLEX_CSV_PATH} \
 --maxjobs={self.jobs_number} \
 --localcores={self.cpus_number} \
 --localmem={self.total_memory_used}
