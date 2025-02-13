@@ -1,25 +1,20 @@
 # This is the configuration file to run the cellranger pipeline on the Weizmann cluster/ AWS S3
 
 # Required:
-project_name: giaco
+project_name: giacococmo
 
 # Required:
 id: liver3
 
 # Required: Choose your pipeline!
 pipeline: demulti
-                                                                                                                                            
-# Optional:
-Sample_sheet_address:
 
 # Default: /apps/RH7U2/general/cellranger/7.1.0/cellranger
-aligner_software_path: 
+aligner_software_path: Default
 
 # Default: Designated to Wexac
 running_machine: Default
-                                                                                                    
-# TBD: if you are not using AWS s3 this one is not necessary
-s3_access_file:                                                                                                                                                         
+                                                                                                                                                                                                                                              
 
 
 

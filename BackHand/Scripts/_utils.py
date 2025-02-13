@@ -47,6 +47,7 @@ OUTPUT_PATH =                               os.path.join(PROJECT_NAME_PATH, "Out
 mkfastq_path =                              os.path.join(OUTPUT_PATH, "mkfastq.sh")
 make_multi_path =                           os.path.join(OUTPUT_PATH, "make_multi.sh")
 make_count_path =                           os.path.join(OUTPUT_PATH, "make_count.sh")
+make_qc_path =                              os.path.join(OUTPUT_PATH, "make_qc.sh")
 make_h5_path =                              os.path.join(OUTPUT_PATH, "make_h5.sh")
 make_h5ads_path =                           os.path.join(OUTPUT_PATH, "make_h5ads.sh")
 demulti_path =                              os.path.join(OUTPUT_PATH, "demulti.sh")
@@ -75,6 +76,8 @@ multi_log =                                 os.path.join(LOGS_PATH, "multi_" + c
 multi_error_log =                           os.path.join(LOGS_PATH, "multi_" + config['id'] + ".err.log")
 demultiplex_log =                           os.path.join(LOGS_PATH, "deMULTIplex_" + config['id'] + ".log")
 demultiplex_error_log =                     os.path.join(LOGS_PATH, "deMULTIplex_" + config['id'] + ".err.log")
+qc_log =                                    os.path.join(LOGS_PATH, "qc_" + config['id'] + ".log")
+qc_error_log =                              os.path.join(LOGS_PATH, "qc_" + config['id'] + ".log")
 
 # Keys
 GENE_SYMBOLS_KEY =                          "gene_symbols"
@@ -88,7 +91,7 @@ ANTIBODY_KEY =                              "Antibody Capture"
 CLASSIFICATION_KEY =                        "Classification"
 
 # Program runner
-R_RUNNER =                                  "" # Currently there is no Rscript binary file that can be loaded from wexac
+
 
 # Cellbender runner files path
 CELLBENDER_PYTHON_RUNNER =                  "/home/labs/nyosef/yoavnah/CellRangerIDE/BackHand/Scripts/cellbender.py"

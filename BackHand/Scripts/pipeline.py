@@ -53,7 +53,7 @@ class pipeline:
             self.running_machine        = "Wexac"
 
         self.aligner_software_path      = config['aligner_software_path']
-        if self.aligner_software_path   == None:
+        if self.aligner_software_path   == 'Default':
             self.aligner_software_path  = DEFAULT_ALIGNER_PATH
 
         if self.pipeline                 == "mkfastq":
@@ -242,7 +242,7 @@ f"wget --no-check-certificate {incpm_link[i]}SampleSheet.csv --output-document={
                         self.probe_barcode_ids        = config_selected_pipeline['probe_barcode_ids']
                         self.probe_description        = config_selected_pipeline['probe_description']
 
-            else:           ##### TBD!!!!
+            else:          
                 incpm_path                          = config_selected_pipeline['INCPM_directory']
                 if incpm_path                       == 'Default':
                     incpm_path                      = INCPM_PATH
@@ -342,6 +342,10 @@ f"wget --no-check-certificate {incpm_link[i]}SampleSheet.csv --output-document={
             self.demultiplex_method             = config_selected_pipeline['demultiplex_method']
             self.adata_path                     = config_selected_pipeline['adata_path']
             self.sample_names                   = config_selected_pipeline['sample_names']
+            self.priors                         = config_selected_pipeline['priors']
+            if self.priors                      == 'Default':
+                self.priors                     = [0.01,0.8,0.19]
+                self.priors                     = [self.priors for _ in range(len(self.sample_names))]
             self.hto_list_per_sample            = config_selected_pipeline['hto_list_per_sample']
             self.sample_id_to_expected_barcodes = {}
             for index, sample in enumerate(self.sample_names):
@@ -602,7 +606,7 @@ OPTIONS:
             self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["create-bam", "true", None, None]], columns=col)], ignore_index=True)
         else:
             self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["create-bam", "false", None, None]], columns=col)], ignore_index=True)
-        if self.R1_gex_len is not None and self.R2_gex_len is not None:
+        if self.R1_gex_len is not 'Default' and self.R2_gex_len is not 'Default':
             self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["r1-length", self.R1_gex_len, None, None]], columns=col)], ignore_index=True)
             self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["r2-length", self.R2_gex_len, None, None]], columns=col)], ignore_index=True)
         if self.expected_cells is not None:
@@ -653,13 +657,17 @@ OPTIONS:
         with open(make_multi_path, "w+") as f:
             f.write(
             f"""#!/usr/bin/bash
-    
+
+cp {OUTPUT_PATH}
 {self.aligner_software_path} multi \
 --id={self.id} \
 --csv={MULTI_CSV_PATH} \
 --maxjobs={self.jobs_number} \
 --localcores={self.cpus_number} \
---localmem={self.total_memory_used}
+--localmem={self.total_memory_used} &
+PID=$! 
+wait $PID
+mv {BEFORE_DEMULTI_H5ADS_PATH} 
 
             """ 
             )
@@ -675,12 +683,42 @@ OPTIONS:
 #BSUB -oo {multi_log}
 #BSUB -eo {multi_error_log} 
 
-bash {make_multi_path} {OUTPUT_PATH}
+cd {OUTPUT_PATH}
+bash {make_multi_path}
 
             """
-
             )
-    
+            subprocess.run(f"cat {run_file_path} | bsub ", shell=True)
+        
+        else:
+            subprocess.run(f"bash {make_multi_path}",
+                shell=True,
+                stdout=multi_log,  
+                stderr=multi_error_log
+            )
+    def qcScores(self):
+
+        subprocess.run(f"cd {QC_PATH}",
+                        shell=True)
+        subprocess.run(f"multiqc {OUTPUT_PATH}{self.id}",
+                        shell=True,
+                        stdout=qc_log,
+                        stderr=qc_error_log)
+        
+        with open(make_qc_path, "w+") as h:
+                h.write(
+            f"""
+PER_SAMPLE_FOLDERS=$(ls {OUTPUT_PATH}outs/per_sample_outs/)
+for sample in $PER_SAMPLE_FOLDERS; do
+    cp {OUTPUT_PATH}outs/per_sample_outs/$sample/web_summary.html {QC_PATH}/$sample-web_summary.html
+done
+            """
+            )
+        subprocess.run(f"cd {QC_PATH}",
+                        shell=True)
+        subprocess.run(f"bash {make_qc_path}",
+                        shell=True)
+
     def demultiplex(self):    
         
         if self.demultiplex_method == 'hashsolo':
@@ -688,7 +726,8 @@ bash {make_multi_path} {OUTPUT_PATH}
                 adata = sc.read_10x_h5(self.adata_path[index], gex_only=False)
                 sample, hashtags = list(self.sample_id_to_expected_barcodes.items())[index]
                 number_of_noise_barcodes = len(hashtags) - 1
-                adata = demultiplex.hashsolo({sample: hashtags}, sample=sample, adata=adata, number_of_noise_barcodes=number_of_noise_barcodes, plot=False)
+                priors = tuple(self.priors[index])
+                adata = demultiplex.hashsolo({sample: hashtags}, sample=sample, adata=adata, priors=priors, number_of_noise_barcodes=number_of_noise_barcodes, plot=False)
                 
                 adata.var[GENE_SYMBOLS_KEY] = adata.var.index
                 adata.var.set_index(GENE_IDS_KEY, inplace=True)
@@ -698,6 +737,7 @@ bash {make_multi_path} {OUTPUT_PATH}
 
                 adata_path = os.path.join(DEMULTIPLEXED_H5ADS_PATH, f"{sample}.h5ad")
                 adata.write(adata_path)
+
 
         elif self.demultiplex_method == 'demultiplex2':
             log_file = open(demultiplex_log, "w+")
@@ -800,20 +840,23 @@ OPTIONS:
 
     def cellbender(self):
             
-            base_directory = os.path.basename(self.data_path)
-            save_dir = os.path.join(base_directory, "cellbender")
-            if not os.path.exists(save_dir):
-                os.makedirs(save_dir)
-            result = cb.run_cellbender_shell(base_directory, self.data_path, self.cellbender_shell, self.chosen_pipeline)
-            if not result:
-                print("Error encountered, stopping further execution.")
-                return
-            else:
-                try:
-                    cb.save_files_locally(base_directory, self.data_path, save_dir)
-                except Exception as e:
-                    print(f"Failed to save files for donor {base_directory}: {e}")
+        if self.data_path.endswith('/'):
+            self.data_path = self.data_path[:-1]
+        base_directory = os.path.basename(self.data_path)
+        self.data_path = os.path.dirname(self.data_path)
+        save_dir = os.path.join(base_directory, "cellbender")
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+        result = cb.run_cellbender_shell(base_directory, self.data_path, self.cellbender_shell, self.chosen_pipeline)
+        if not result:
+            print("Error encountered, stopping further execution.")
             return
+        else:
+            try:
+                cb.save_files_locally(base_directory, self.data_path, save_dir)
+            except Exception as e:
+                print(f"Failed to save files for donor {base_directory}: {e}")
+        return
 
     
     def multi_flex(self):
@@ -889,6 +932,9 @@ sh {make_multi_path}
             """
 
             )
+    
+    def velocyto(self):
+        pass
     
 
         

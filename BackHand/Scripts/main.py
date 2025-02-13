@@ -1,4 +1,3 @@
-# 
 from pipeline import pipeline
 
 def which_pipeline(pipeline_num) -> None:
@@ -17,6 +16,10 @@ def which_pipeline(pipeline_num) -> None:
         my_pipe.cellbender()
     elif pipeline_num == 'flex':
         return my_pipe.multi_flex()
+    elif pipeline_num == 'velocyto':
+        return my_pipe.velocyto()
+    elif pipeline_num == 'QC':
+        return my_pipe.qcScores:
     else: 
         print("Your choice is not valid!!!\nPlz choose another pip3line :P ")
     return None
@@ -27,3 +30,5 @@ my_pipe = pipeline()
 which_pipeline(my_pipe.pipeline)
 print("Files were generated successfully")
 print("Ciao!")
+
+

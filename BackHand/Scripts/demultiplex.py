@@ -3,7 +3,7 @@ import os
 import scanpy as sc
 import pandas as pd
 import subprocess
-from _utils import CSV_PATH, R_RUNNER, OUTPUT_PATH, DEMULTIPLEXED_H5ADS_PATH, LOGS_PATH
+from _utils import CSV_PATH, OUTPUT_PATH, DEMULTIPLEXED_H5ADS_PATH, LOGS_PATH
 from ridgeplot import ridgeplot
 from typing import List
 import numpy as np
@@ -15,7 +15,7 @@ from _utils import (
     H5_PATH
 )
 
-def hashsolo(sample_id_to_expected_barcodes: dict, sample: str, adata: ad.AnnData, number_of_noise_barcodes: int, plot: bool = True) -> ad.AnnData:
+def hashsolo(sample_id_to_expected_barcodes: dict, sample: str, adata: ad.AnnData, priors: tuple, number_of_noise_barcodes: int, plot: bool = True) -> ad.AnnData:
 
     bdata = adata.copy()
     all_barcodes = list(adata.var[adata.var[FEATURE_TYPE_KEY] == ANTIBODY_KEY].index.unique())
@@ -31,7 +31,7 @@ def hashsolo(sample_id_to_expected_barcodes: dict, sample: str, adata: ad.AnnDat
     for barcode in all_barcodes:
         adata = adata[:, adata.var.index != barcode]
 
-    sc.external.pp.hashsolo(bdata, expected_barcodes, number_of_noise_barcodes)
+    sc.external.pp.hashsolo(bdata, expected_barcodes, priors=priors ,number_of_noise_barcodes=number_of_noise_barcodes)
 
     df = bdata.obs[[
         "most_likely_hypothesis", 
@@ -112,16 +112,24 @@ write.csv(coefs, '{os.path.join(DEMULTIPLEXED_H5ADS_PATH, 'coefs_deMULTIplex2.cs
     with open(stdout_log_path, "w") as stdout_file, open(stderr_log_path, "w") as stderr_file:
     # Run the subprocess
         process = subprocess.Popen(
-            [f"{R_RUNNER}", f"{r_script_file}"],
-            stdout=stdout_file,  # Pass the opened file object, not the path
-            stderr=stderr_file   # Pass the opened file object, not the path
+            [f"Rscript", f"{r_script_file}"],
+            stdout=stdout_file,  
+            stderr=stderr_file   
         )
         process.wait()
         
     mask = pd.read_csv(os.path.join(DEMULTIPLEXED_H5ADS_PATH, 'final_assign_deMULTIplex2.csv'))
+    rows_to_add = []
+    j = 0 
     for i in range(len(adata.obs)):
-        if mask['Unnamed: 0'][i] != adata.obs.iloc[i]._name:
-            mask = pd.concat([mask.iloc[:i], pd.DataFrame({'Unnamed: 0': adata.obs.iloc[i]._name, 'res$final_assign': ['negative']}), mask.iloc[i:]]).reset_index(drop=True)
+        if mask['Unnamed: 0'][j] != adata.obs.index[i]:
+            rows_to_add.append(pd.DataFrame({'Unnamed: 0': [adata.obs.index[i]], 'res$final_assign': ['negative']}))
+            j-=1
+        j+=1
+    if rows_to_add:
+        rows_to_add = pd.concat(rows_to_add, ignore_index=True)
+        mask = pd.concat([mask, rows_to_add]).sort_values('Unnamed: 0').reset_index(drop=True)
+
     mask1 = mask["res$final_assign"].isin(expected_barcodes)
     adata = adata[mask1]
     mask = mask[mask['res$final_assign'].isin(expected_barcodes)]
