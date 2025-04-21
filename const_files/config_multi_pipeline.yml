@@ -4,6 +4,7 @@
 alignment_ref_genome_file: Default
 
  # Optional
+ # Default: refdata-cellranger-vdj-GRCh38-alts-ensembl-7.1.0
 alignment_ref_vdj_file: Default
 
 ############# Option 1 ############
@@ -19,7 +20,7 @@ INCPM_directory: Default
 # Required:
 fastq_path: 
   - #Add the path to the fastq files here 
-  -  #Add the path to the fastq files here
+  - #Add the path to the fastq files here
 
 # Required: true or false
 create_bam: true
@@ -30,13 +31,13 @@ include_introns: true
 # Optional: int
 expected_cell: 20000
 
-# Optional: int
-R1_gex_length:
-R2_gex_length:
+# Default: R1->28 Reads, R2->90 Reads
+R1_gex_length: Default
+R2_gex_length: Default
 
-# Optional: int
-R1_vdj_length:
-R2_vdj_length:
+# Default: R1->28 Reads, R2->90 Reads
+R1_vdj_length: Default
+R2_vdj_length: Default
 
 # Required: usually named after the prefix in the fastqs files
 sample_name: 

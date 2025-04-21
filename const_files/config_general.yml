@@ -1,39 +1,40 @@
-# This is the configuration file to run the cellranger pipeline on the Weizmann cluster/ AWS S3
+# This is the configuration file to run the cellranger pipeline on the Weizmann cluster/ AWS EC2 / PC
 
 # Required:
-project_name: giaco
+project_name: yoav_liver
 
 # Required:
-id: liver3
+id: liver
 
 # Required: Choose your pipeline!
-pipeline: demulti
-                                                                                                                                            
-# Optional:
-Sample_sheet_address:
+pipeline: cellbender
 
-# Default: /apps/RH7U2/general/cellranger/7.1.0/cellranger
-aligner_software_path: 
+# Required: choose: 
+# For mrna-seq choose cellranger
+# For atac-seq choose cellranger-atac
+aligner_software_path: cellranger
 
 # Default: Designated to Wexac
-running_machine: Default
-                                                                                                    
-# TBD: if you are not using AWS s3 this one is not necessary
-s3_access_file:                                                                                                                                                         
+running_machine:  
+
+# Default: False
+aws_ec2: 
+                                                                                                                                                                                                                                              
 
 
 
 
 
-# Runtime parameters set to be nominal runtime on wexac
+# Runtime parameters set to be nominal turnaround runtime
 # Required
 jobs_number: 5
 
 # Required
-cpus_number: 1
+cpus_number: 5
 
 # Required (in GB)
 total_memory_used: 70 
 
 # Required (only for wexac)
 queue: long
+

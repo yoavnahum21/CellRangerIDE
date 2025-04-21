@@ -1,5 +1,8 @@
 # This is the configuration file to run the cellranger pipeline which creates annotated data files for flex samples!
 
+# Default: refdata-gex-mm10-2020-Apwd
+alignment_ref_genome_file: Default
+
 ############# Option 1: use INCPM link############
 # Required: 
 INCPM_link: 
@@ -13,9 +16,6 @@ INCPM_directory: Default
 fastq_path: 
   -  #Add the path to the fastq files here 
   -  #Add the path to the fastq files here
-
-# Default: refdata-gex-mm10-2020-Apwd
-alignment_ref_genome_file: Default
 
 # Required: download your desired probe set file from the next link: https://www.10xgenomics.com/support/flex-gene-expression/documentation/steps/probe-sets/chromium-frp-probe-set-files#download-probe-files
 probe_set_path: 
@@ -53,6 +53,7 @@ multiplexing_method:
 
 ############# Probe barcode Section #################
 
+# In case you are using multiplexing method
 # Required, otherwise need to use fill the relevant attribuetes manually
 probe_barcode_csv: 
 

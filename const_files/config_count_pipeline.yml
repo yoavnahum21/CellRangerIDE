@@ -2,10 +2,14 @@
 
 
 # Required
-sample_name:
+id: 
+   - 
+   -
 
 # Default: refdata-gex-mm10-2020-A
 alignment_ref_genome_file:
 
 # Required
 fastq_path:
+   -
+   -
