@@ -1,5 +1,3 @@
-import time
-time.sleep(1)
 # from ridgeplot import ridgeplot
 import anndata as ad
 import os
