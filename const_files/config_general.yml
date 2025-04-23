@@ -1,13 +1,13 @@
-# This is the configuration file to run the cellranger pipeline on the Weizmann cluster/ AWS EC2 / PC
+# This is the configuration file to run the cellranger pipeline on the Weizmann cluster/ AWS EC2 / Your PC
 
 # Required:
-project_name: yoav_liver
+project_name: 
 
 # Required:
-id: liver
+id: 
 
 # Required: Choose your pipeline!
-pipeline: cellbender
+pipeline: 
 
 # Required: choose: 
 # For mrna-seq choose cellranger
@@ -15,10 +15,10 @@ pipeline: cellbender
 aligner_software_path: cellranger
 
 # Default: Designated to Wexac
-running_machine:  
+running_machine:  Default
 
 # Default: False
-aws_ec2: 
+aws_ec2: Default
                                                                                                                                                                                                                                               
 
 

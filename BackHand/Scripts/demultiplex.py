@@ -1,3 +1,6 @@
+import time
+time.sleep(1)
+# from ridgeplot import ridgeplot
 import anndata as ad
 import os
 import sys
@@ -6,7 +9,6 @@ if sys.version.split()[0] >= '3.9':
 import pandas as pd
 import subprocess
 from _utils import CSV_PATH, OUTPUT_PATH, DEMULTIPLEXED_H5ADS_PATH, LOGS_PATH
-from ridgeplot import ridgeplot
 from typing import List
 import numpy as np
 import matplotlib.pyplot as plt
@@ -156,12 +158,12 @@ def plot_qc(sample: str, adata: ad.AnnData, barcodes: List[str]):
 
     log_keys = [f"{barcode}_log" for barcode in barcodes]
     df = adata.obs[log_keys]
-    fig = ridgeplot(
-        samples=df.values.T,
-        bandwidth=0.5,
-        labels=barcodes,
-        spacing=5/9
-    )
-    fig.show()
-    path = os.path.join(H5_PATH, f"{sample}_ridge.png")
-    fig.write_image(path)
+    # fig = ridgeplot(
+    #     samples=df.values.T,
+    #     bandwidth=0.5,
+    #     labels=barcodes,
+    #     spacing=5/9
+    # )
+    # fig.show()
+    # path = os.path.join(H5_PATH, f"{sample}_ridge.png")
+    # fig.write_image(path)

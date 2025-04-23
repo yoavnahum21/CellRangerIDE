@@ -1,8 +1,11 @@
+
+
+
 from _utils import * 
 import os
 import sys
 import subprocess
-import demultiplex as demultiplex
+import demultiplex 
 import pandas as pd
 import numpy as np
 if sys.version.split()[0] >= '3.9':
@@ -93,6 +96,8 @@ class pipeline:
                 self.lanes_used                     = config_selected_pipeline['lanes_used']
                 if self.lanes_used[0]               == 'Default':
                     self.lanes_used                 =  ['any'] * len(self.sample_names)
+                if self.lanes_used[0]               == None:
+                    self.lanes_used                 =  [''] * len(self.sample_names)
                 self.feature_types                  = config_selected_pipeline['feature_types']
                 if self.multiplexing_method         == "feature_barcode":
                     self.feature_reference_csv      = config_selected_pipeline['feature_reference_csv']
@@ -642,7 +647,7 @@ OPTIONS:
             self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["create-bam", "true", None, None]], columns=col)], ignore_index=True)
         else:
             self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["create-bam", "false", None, None]], columns=col)], ignore_index=True)
-        if self.R1_gex_len is not 'Default' and self.R2_gex_len is not 'Default':
+        if self.R1_gex_len != 'Default' and self.R2_gex_len != 'Default':
             self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["r1-length", self.R1_gex_len, None, None]], columns=col)], ignore_index=True)
             self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["r2-length", self.R2_gex_len, None, None]], columns=col)], ignore_index=True)
         if self.expected_cells is not None:
@@ -654,7 +659,7 @@ OPTIONS:
             self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([[None, None, None, None]], columns=col)], ignore_index=True)
             self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([['[vdj]', None, None, None]], columns=col)], ignore_index=True)
             self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([['reference', self.aligner_ref_vdj_path, None, None]], columns=col)], ignore_index=True)
-            if self.R1_vdj_len is not None and self.R2_vdj_len is not None:
+            if self.R1_vdj_len != None and self.R2_vdj_len != None:
                 self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["r1-length", self.R1_vdj_len, None, None]], columns=col)], ignore_index=True)
                 self.multi_csv = self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([["r2-length", self.R2_vdj_len, None, None]], columns=col)], ignore_index=True)
 
@@ -678,7 +683,7 @@ OPTIONS:
             self.multi_csv.to_csv(MULTI_CSV_PATH, header=False, index=False)    
         elif (self.multiplexing_method == 'feature_barcode'):
             self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([['[feature]', None, None, None]], columns=col)], ignore_index=True)
-            if(self.feature_reference_csv != 'Default'):
+            if(self.feature_reference_csv != 'Default' or self.feature_reference_csv != None):
                 self.multi_csv = pd.concat([self.multi_csv, pd.DataFrame([['reference', self.feature_reference_csv, None, None]], columns=col)], ignore_index=True)
             else:
                 sample_sheet = pd.DataFrame([self.hto_id,self.hto_names,self.hto_read,self.hto_pattern,self.hto_sequence,self.HTO_feature_type]).transpose()
@@ -694,7 +699,7 @@ OPTIONS:
             f.write(
             f"""#!/usr/bin/bash
 
-cp {OUTPUT_PATH}
+cd {BEFORE_DEMULTI_H5ADS_PATH}
 {self.aligner_software_path} multi \
 --id={self.id} \
 --csv={MULTI_CSV_PATH} \
@@ -703,7 +708,6 @@ cp {OUTPUT_PATH}
 --localmem={self.total_memory_used} &
 PID=$! 
 wait $PID
-mv {BEFORE_DEMULTI_H5ADS_PATH} 
 
             """ 
             )
@@ -719,7 +723,6 @@ mv {BEFORE_DEMULTI_H5ADS_PATH}
 #BSUB -oo {multi_log}
 #BSUB -eo {multi_error_log} 
 
-cd {OUTPUT_PATH}
 bash {make_multi_path}
 
             """
