@@ -24,4 +24,4 @@ Instructions:
 
 1) Fill out the config file located in the const_file folder
 
-2) Dynamic parameters such as: RAM usage, number of cpu cores, will be updated in the program through the script input fields, for example: on your machine run: "python path_to_CellrangerIDE\BackHand\Scripts\main.py 10 5 70" where 10 refers to the number of job, 5 refers to the number of cpu cores and 70 refers to the amout of RAM (70GB)
+2) Dynamic parameters such as: RAM usage, number of cpu cores, will be updated in the program through the script input fields, for example: on your machine run: "python path_to_CellrangerIDE\BackHand\Scripts\main.py 10 5 70" where 10 refers to the number of job, 5 refers to the number of cpu cores and 70 refers to the amout of RAM (70GB).
