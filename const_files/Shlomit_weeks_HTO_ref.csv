@@ -1,0 +1,5 @@
+id,name,read,pattern,sequence,feature_type
+Week_0,Week_0,R2,5PNNNNNNNNNN(BC),AACCTTTGCCACTGC,Antibody Capture
+Week_1,Week_1,R2,5PNNNNNNNNNN(BC),GTCCGACTAATAGCT,Antibody Capture
+Week_2,Week_2,R2,5PNNNNNNNNNN(BC),CAGGTTGTTGTCATT,Antibody Capture
+Week_3,Week_3,R2,5PNNNNNNNNNN(BC),TATTTCCACCCGGTC,Antibody Capture

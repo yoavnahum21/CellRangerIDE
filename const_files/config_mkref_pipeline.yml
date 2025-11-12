@@ -1,0 +1,44 @@
+# This is the configuration file to run the cellranger pipeline which creates creates customized reference transcriptomes for you alignment!
+
+# Pay attention you can add one genome at the time for each run
+
+# Required
+original_fasta_file_path:
+
+# Required
+customized_fasta_file_path:
+
+# Required
+fasta_of_new_gene:
+
+# Required 
+original_gtf_file_path:
+
+# Required
+customized_gtf_file_path:
+
+# Required
+gtf_of_new_gene:
+
+# Required
+genome_name:
+
+# Optional: choose any of the attributes below
+filter_gtf_attribute:
+  - protein_coding
+  - lncRNA
+  - antisense
+  - IG_C_gene
+  - IG_D_gene
+  - IG_J_gene
+  - IG_LV_gene
+  - IG_V_gene
+  - IG_V_pseudogene
+  - IG_J_pseudogene
+  - IG_C_pseudogene
+  - TR_C_gene
+  - TR_D_gene
+  - TR_J_gene
+  - TR_V_gene
+  - TR_V_pseudogene
+  - TR_J_pseudogene

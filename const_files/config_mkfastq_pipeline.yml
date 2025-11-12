@@ -1,0 +1,44 @@
+# This is the configuration file to run the cellranger pipeline which creates fastqs from BCL files!
+
+# Required
+BCL_path: 
+
+# Required
+Lanes:
+  -
+  -
+
+# Required 
+sample_name:
+  -
+  -
+
+# Required
+index:
+  -
+  -
+
+# Optional
+filter-single-index:
+
+# Optional
+filter-dual-index:
+
+# Optional: bool-> true/false
+rc-i2-override:
+
+### When using multiple samples!! ###
+
+# Optional
+lanes:
+  -
+  -
+
+# Optional: bool-> true/false
+use-bases-mask:
+
+# Optional: bool-> true/false
+delete-undetermined:
+
+# Optional
+output-directory: 

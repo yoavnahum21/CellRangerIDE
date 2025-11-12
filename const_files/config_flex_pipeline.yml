@@ -1,0 +1,160 @@
+# This is the configuration file to run the cellranger pipeline which creates annotated data files for flex samples!
+
+<<<<<<< HEAD
+# Default: refdata-gex-mm10-2020-Apwd
+alignment_ref_genome_file: Default
+
+############# Option 1: use INCPM link############
+# Required: 
+INCPM_link: 
+  -
+
+# Default: File_Path/INCPM
+INCPM_directory: Default
+
+############# Option 2: fill the file manually ############
+# Required:
+fastq_path: 
+  -  #Add the path to the fastq files here 
+  -  #Add the path to the fastq files here
+
+# Required: download your desired probe set file from the next link: https://www.10xgenomics.com/support/flex-gene-expression/documentation/steps/probe-sets/chromium-frp-probe-set-files#download-probe-files
+probe_set_path: 
+
+# Required: true or false
+create_bam: 
+
+# Optional: true or false
+include_introns: 
+=======
+############# Option 1: use INCPM link############
+# Required: 
+INCPM_link: 
+- 
+
+############# Option 2: fill the file manually ############
+# Required:
+fastq_folder_path: 
+  - /home/projects/nyosef/yoavnah/CellRangerIDE/Projects/TS-F7/File_Path/INCP/fastqs/Flex_Brest_cancer  #Add the path to the fastq files here
+  - /home/projects/nyosef/yoavnah/CellRangerIDE/Projects/TS-F7/File_Path/INCP/fastqs/Pedro 
+
+# Default: refdata-gex-mm10-2020-Apwd
+alignment_ref_genome_file: /shareDB/CellRanger/refdata-gex-GRCm39-2024-A
+
+# Required: download your desired probe set file from the next link: https://www.10xgenomics.com/support/flex-gene-expression/documentation/steps/probe-sets/chromium-frp-probe-set-files#download-probe-files
+probe_set_path: /home/projects/nyosef/yoavnah/CellRangerIDE/const_files/flex_probe_csv/Chromium_Mouse_Transcriptome_Probe_Set_v1.1.1_GRCm39-2024-A.csv
+
+# Required: true or false
+create_bam: false 
+
+# Optional: true or false
+include_introns: true
+>>>>>>> argparser
+
+# Optional: int
+expected_cell: 
+
+# Required: usually named after the prefix in the fastqs files
+sample_name: 
+<<<<<<< HEAD
+  - 
+  - 
+
+# Required: please add the prefix of the fastq files respectevly to the fastq_path order
+fastq_folders_name:
+  - 
+  - 
+
+# Default: any
+lanes_used: 
+  - 
+  - 
+
+# Optional, options: probe_barcode (for now...)
+multiplexing_method: 
+=======
+  - Flex_Brest_cancer
+  - Pedro
+
+# Required: please add the prefix of the fastq files respectevly to the fastq_path order
+fastq_folders_name:
+  - Flex_Brest_cancer
+  - Pedro
+
+# /shareDB/CellRanger/refdata-gex-GRCm39-2024-A/: any
+lanes_used: 
+  - Default
+  - 
+
+# Optional, options: probe_barcode (for now...)
+multiplexing_method: probe_barcode
+>>>>>>> argparser
+
+
+
+
+
+############# Probe barcode Section #################
+
+<<<<<<< HEAD
+# In case you are using multiplexing method
+=======
+>>>>>>> argparser
+# Required, otherwise need to use fill the relevant attribuetes manually
+probe_barcode_csv: 
+
+
+
+
+## Manual Section
+# Required (if probe_barcode_csv wasn't given)
+sample_id_probe:
+<<<<<<< HEAD
+  - 
+  - 
+  -
+  - 
+
+# Required (if probe_barcode_csv wasn't given)
+probe_barcode_ids:
+  - 
+  - 
+  - 
+  - 
+
+# Default: copied from sample_id
+probe_description:
+  - 
+  - 
+  - 
+  - 
+=======
+  - w.t_Left_1
+  - w.t_Left_2
+  - anti_CD84_Left_1
+  - anti_CD84_Left_2
+# Required (if probe_barcode_csv wasn't given)
+probe_barcode_ids:
+  - BC001
+  - BC002
+  - BC003
+  - BC004
+
+# Default: copied from sample_id
+probe_description:
+  - wt_Left_1
+  - wt_Left_2
+  - anti_CD84_Left_1
+  - anti_CD84_Left_2
+
+>>>>>>> argparser
+# End of Manual Section
+
+############# END OF Probe barcode Section #################
+
+##### Demultiplexing section #####
+##### End of Demultiplexing section ####
+<<<<<<< HEAD
+=======
+
+>>>>>>> argparser

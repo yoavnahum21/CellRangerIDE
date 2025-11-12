@@ -1,0 +1,67 @@
+<<<<<<< HEAD
+# This is the configuration file to run the cellranger pipeline on the Weizmann cluster/ AWS EC2 / Your PC
+
+# Required:
+project_name: 
+
+# Required:
+id: 
+
+# Required: Choose your pipeline!
+pipeline: 
+
+# Required: choose: 
+# For mrna-seq choose cellranger
+# For atac-seq choose cellranger-atac
+aligner_software_path: cellranger
+
+# Default: Designated to Wexac
+running_machine:  Default
+
+# Default: False
+aws_ec2: Default
+=======
+# This is the configuration file to run the cellranger pipeline on the Weizmann cluster/ AWS S3
+
+# Required:
+project_name: TS-F7
+
+# Required:
+id: flex
+
+# Required: Choose your pipeline!
+pipeline: multi
+
+# Default: /apps/easybd/easybuild/amd/software/CellRanger/9.0.0/bin/cellranger
+aligner_software_path: Default
+
+# Default: Designated to Wexac
+running_machine: Default
+>>>>>>> argparser
+                                                                                                                                                                                                                                              
+
+
+
+<<<<<<< HEAD
+
+
+# Runtime parameters set to be nominal turnaround runtime
+=======
+# Runtime parameters set to be nominal runtime on wexac
+>>>>>>> argparser
+# Required
+jobs_number: 5
+
+# Required
+<<<<<<< HEAD
+cpus_number: 5
+=======
+cpus_number: 1
+>>>>>>> argparser
+
+# Required (in GB)
+total_memory_used: 70 
+
+# Required (only for wexac)
+queue: long
+
