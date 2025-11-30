@@ -2,15 +2,6 @@ import os
 import pathlib
 import yaml
 import sys
-<<<<<<< HEAD
-
-try:
-    BASE_PATH =                             sys.argv[1]
-except IndexError:
-    BASE_PATH =                             __file__
-    for _ in range(3):
-        BASE_PATH =                         os.path.dirname(BASE_PATH)
-=======
 import argparse
 import ast
 
@@ -73,7 +64,6 @@ args = parser.parse_args()
 # Base path determination
 
 BASE_PATH =                                args.cellrangeride_path if args.cellrangeride_path else str(pathlib.Path(__file__).parent.parent.parent.resolve())
->>>>>>> argparser
 REFERENCE_PATH =                            "/shareDB/CellRanger/"
 
 # Config files declaration
@@ -87,12 +77,8 @@ with open(CONFIG_SELECTED_PIPELINE_PATH,'r') as g:
     config_selected_pipeline =              yaml.safe_load(g) 
 
 # Project building folders
-<<<<<<< HEAD
-project_name =                              config['project_name']
-=======
 project_name =                              args.project_name if args.project_name else config['project_name']
 id =                                        args.id if args.id else config['id']
->>>>>>> argparser
 PROJECT_PATH =                              os.path.join(BASE_PATH, "Projects")
 PROJECT_NAME_PATH =                         os.path.join(PROJECT_PATH, project_name)
 FILE_PATH =                                 os.path.join(PROJECT_NAME_PATH, "File_Path")
@@ -101,10 +87,6 @@ BCL_PATH =                                  os.path.join(FILE_PATH, "BCL")
 CSV_PATH =                                  os.path.join(FILE_PATH, "CSV")
 FASTQ_PATH =                                os.path.join(FILE_PATH, "Fastqs")
 CUSTOM_REF_PATH =                           os.path.join(FILE_PATH, "Custom_Ref")
-<<<<<<< HEAD
-CELLBENDER_PATH =                           os.path.join(FILE_PATH, "Cellbender")
-=======
->>>>>>> argparser
 FASTQC_PATH =                               os.path.join(FASTQ_PATH, "fastqc")
 H5_PATH =                                   os.path.join(FILE_PATH, "h5")
 H5ADS_PATH =                                os.path.join(FILE_PATH, "h5ads")
@@ -146,23 +128,12 @@ custom_gtf_reference_path =                 os.path.join(CUSTOM_REF_PATH, "custo
 custom_fasta_reference_path =               os.path.join(CUSTOM_REF_PATH, "custom_ref.fasta")
 
 # Logs
-<<<<<<< HEAD
-multi_log =                                 os.path.join(LOGS_PATH, "multi_" + config['id'] + ".log")
-multi_error_log =                           os.path.join(LOGS_PATH, "multi_" + config['id'] + ".err.log")
-count_log =                                 os.path.join(LOGS_PATH, "count_" + config['id'] + ".log")
-count_error_log =                           os.path.join(LOGS_PATH, "count_" + config['id'] + ".err.log")
-demultiplex_log =                           os.path.join(LOGS_PATH, "deMULTIplex_" + config['id'] + ".log")
-demultiplex_error_log =                     os.path.join(LOGS_PATH, "deMULTIplex_" + config['id'] + ".err.log")
-qc_log =                                    os.path.join(LOGS_PATH, "qc_" + config['id'] + ".log")
-qc_error_log =                              os.path.join(LOGS_PATH, "qc_" + config['id'] + ".log")
-=======
 multi_log =                                 os.path.join(LOGS_PATH, "multi_" + id + ".log")
 multi_error_log =                           os.path.join(LOGS_PATH, "multi_" + id + ".err.log")
 demultiplex_log =                           os.path.join(LOGS_PATH, "deMULTIplex_" + id + ".log")
 demultiplex_error_log =                     os.path.join(LOGS_PATH, "deMULTIplex_" + id + ".err.log")
 qc_log =                                    os.path.join(LOGS_PATH, "qc_" + id + ".log")
 qc_error_log =                              os.path.join(LOGS_PATH, "qc_" + id + ".log")
->>>>>>> argparser
 
 # Keys
 GENE_SYMBOLS_KEY =                          "gene_symbols"
@@ -177,13 +148,6 @@ CLASSIFICATION_KEY =                        "Classification"
 
 # Program runner
 
-<<<<<<< HEAD
-# Scripts
-SCRIPTS_PATH =                              os.path.join(BASE_PATH, "BackHand/Scripts")
-# Cellbender runner files path          
-CELLBENDER_PYTHON_RUNNER =                  os.path.join(SCRIPTS_PATH, "cellbenderPipe.py")
-CELLBENDER_SHELL_RUNNER =                   os.path.join(SCRIPTS_PATH, "run_cellbender.sh")
-=======
 
 # Cellbender runner files path
 CELLBENDER_PYTHON_RUNNER =                  "/home/projects/nyosef/yoavnah/CellRangerIDE/BackHand/Scripts/cellbender.py"
@@ -191,4 +155,3 @@ CELLBENDER_SHELL_RUNNER  =                  "/home/projects/nyosef/yoavnah/CellR
 
 # Supported pipelines
 SUPPORTED_PIPELINES =                       ['mkfastq', 'multi', 'count', 'demulti', 'mkref', 'cellbender', 'flex', 'velocyto', 'QC']
->>>>>>> argparser
