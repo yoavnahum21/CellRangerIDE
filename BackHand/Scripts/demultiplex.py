@@ -1,23 +1,12 @@
-<<<<<<< HEAD
 # from ridgeplot import ridgeplot
 import anndata as ad
 import os
 import sys
 if sys.version.split()[0] >= '3.9':
-=======
-import anndata as ad
-import os
-import sys
-if sys.version.split()[0] < '3.13':
->>>>>>> argparser
     import scanpy as sc
 import pandas as pd
 import subprocess
 from _utils import CSV_PATH, OUTPUT_PATH, DEMULTIPLEXED_H5ADS_PATH, LOGS_PATH
-<<<<<<< HEAD
-=======
-from ridgeplot import ridgeplot
->>>>>>> argparser
 from typing import List
 import numpy as np
 import matplotlib.pyplot as plt
@@ -122,7 +111,6 @@ write.csv(coefs, '{os.path.join(DEMULTIPLEXED_H5ADS_PATH, 'coefs_deMULTIplex2.cs
     stderr_log_path = os.path.join(LOGS_PATH, 'deMULTIplex_log.err.log')
 
     # Open the log files
-<<<<<<< HEAD
     with open(stdout_log_path, "w") as stdout_file, open(stderr_log_path, "w") as stderr_file:
     # Run the subprocess
         process = subprocess.Popen(
@@ -131,16 +119,6 @@ write.csv(coefs, '{os.path.join(DEMULTIPLEXED_H5ADS_PATH, 'coefs_deMULTIplex2.cs
             stderr=stderr_file   
         )
         process.wait()
-=======
-#    with open(stdout_log_path, "w") as stdout_file, open(stderr_log_path, "w") as stderr_file:
-    # Run the subprocess
-#        process = subprocess.run(
-#            ["Rscript", f"{r_script_file}"],
-#            stdout=stdout_file,  
-#            stderr=stderr_file   
-#        )
-#        process.wait()
->>>>>>> argparser
         
     mask = pd.read_csv(os.path.join(DEMULTIPLEXED_H5ADS_PATH, 'final_assign_deMULTIplex2.csv'))
     rows_to_add = []
@@ -178,7 +156,6 @@ def plot_qc(sample: str, adata: ad.AnnData, barcodes: List[str]):
 
     log_keys = [f"{barcode}_log" for barcode in barcodes]
     df = adata.obs[log_keys]
-<<<<<<< HEAD
     # fig = ridgeplot(
     #     samples=df.values.T,
     #     bandwidth=0.5,
@@ -188,14 +165,3 @@ def plot_qc(sample: str, adata: ad.AnnData, barcodes: List[str]):
     # fig.show()
     # path = os.path.join(H5_PATH, f"{sample}_ridge.png")
     # fig.write_image(path)
-=======
-    fig = ridgeplot(
-        samples=df.values.T,
-        bandwidth=0.5,
-        labels=barcodes,
-        spacing=5/9
-    )
-    fig.show()
-    path = os.path.join(H5_PATH, f"{sample}_ridge.png")
-    fig.write_image(path)
->>>>>>> argparser

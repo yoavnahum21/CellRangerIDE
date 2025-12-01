@@ -1,10 +1,6 @@
 import pandas as pd
 import os
 import anndata as ad
-<<<<<<< HEAD
-=======
-import sys
->>>>>>> argparser
 import torch
 import subprocess
 import logging
@@ -70,16 +66,11 @@ def run_cellbender_shell(donor, base_data_dir, script_sh, pipeline_used):
             return False
         
     if pipeline_used == 'multi':
-<<<<<<< HEAD
         expectedCell = 0
         file_pattern = os.path.join(data_dir, "outs/per_sample_outs")
         for sample_dir in os.listdir(file_pattern):
             if sample_dir.startswith('.'):
                 continue
-=======
-        file_pattern = os.path.join(data_dir, "outs/per_sample_outs")
-        for sample_dir in os.listdir(file_pattern):
->>>>>>> argparser
             sample_pattern = os.path.join(file_pattern, sample_dir)
             metrics_path = os.path.join(sample_pattern, "metrics_summary.csv")
             
@@ -88,24 +79,16 @@ def run_cellbender_shell(donor, base_data_dir, script_sh, pipeline_used):
                 print("DataFrame read from CSV:")
                 print(df)
                 # Extract the 'Metric Value' where 'Metric Name' is 'Cells'
-<<<<<<< HEAD
                 countcells = df.loc[df['Metric Name'] == 'Cells', 'Metric Value'].values[0]
                 print(f"Extracted expectedCell value: {expectedCell}")
                 # Remove commas from the expectedCell value
                 expectedCell += int(countcells.replace(',', ''))
-=======
-                expectedCell = df.loc[df['Metric Name'] == 'Cells', 'Metric Value'].values[0]
-                print(f"Extracted expectedCell value: {expectedCell}")
-                # Remove commas from the expectedCell value
-                expectedCell = int(expectedCell.replace(',', ''))
->>>>>>> argparser
                 print(f"Processed expectedCell value: {expectedCell}")
             
             except Exception as e:
                 print(f"Error reading expectedCell from CSV: {e}")
                 return False
             
-<<<<<<< HEAD
         script_path = script_sh
         
         # Command to execute the shell script
@@ -126,28 +109,6 @@ def run_cellbender_shell(donor, base_data_dir, script_sh, pipeline_used):
         except subprocess.CalledProcessError as e:
             print(f"Error running shell script for donor {donor}: {e}")
             return False
-=======
-            script_path = script_sh
-            
-            # Command to execute the shell script
-            command = [
-                "bash",
-                script_path,
-                donor,
-                base_data_dir,
-                str(expectedCell),
-                pipeline_used  
-            ]
-
-            print(f"Running shell script for donor {donor}...")
-            try:
-                subprocess.run(command, check=True)
-                print(f"Successfully ran shell script for donor {donor}")
-                return True
-            except subprocess.CalledProcessError as e:
-                print(f"Error running shell script for donor {donor}: {e}")
-                return False
->>>>>>> argparser
 
             
 
@@ -156,11 +117,7 @@ def save_files_locally(donor, base_data_dir, save_dir):
     data_dir = os.path.join(base_data_dir, donor)
 
     # Use glob to find the raw_feature_bc_matrix.h5 file in all subdirectories
-<<<<<<< HEAD
     pattern = os.path.join(data_dir, "**", "raw_feature_bc_matrix.h5")
-=======
-    pattern = os.path.join(data_dir, "**", "sample_raw_feature_bc_matrix.h5")
->>>>>>> argparser
     file_list = glob.glob(pattern, recursive=True)
 
     # Check if the file was found

@@ -2,22 +2,14 @@
 
 
 # Required
-<<<<<<< HEAD
 id: 
    - 
    -
-=======
-sample_name:
->>>>>>> argparser
 
 # Default: refdata-gex-mm10-2020-A
 alignment_ref_genome_file:
 
 # Required
-<<<<<<< HEAD
 fastq_path:
    -
    -
-=======
-fastq_path:
->>>>>>> argparser

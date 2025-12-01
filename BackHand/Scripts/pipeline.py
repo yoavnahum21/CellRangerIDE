@@ -82,7 +82,7 @@ class pipeline:
             self.R2_vdj_len                  = args.R2_vdj_length if args.R2_vdj_length else config_selected_pipeline.get('r2_vdj_length',None)
             if self.aligner_ref_genome_path  == 'Default' or self.aligner_ref_genome_path == None:
                 self.aligner_ref_genome_path = gex_reference_path
-            self.aligner_ref_vdj_path        = config_selected_pipeline['alignment_ref_vdj_file']
+            self.aligner_ref_vdj_path        = args.aligner_ref_vdj_path if args.aligner_ref_vdj_path else config_selected_pipeline.get('alignment_ref_vdj_file',None)
             if self.aligner_ref_vdj_path     == 'Default' or self.aligner_ref_vdj_path == None:
                 self.aligner_ref_vdj_path    = vdj_reference_path  
             self.sample_sheet                = args.incpm_link if args.incpm_link else config_selected_pipeline.get('INCPM_link',None)
@@ -132,18 +132,22 @@ class pipeline:
                 self.feature_reference_csv          = args.feature_reference_csv if args.feature_reference_csv else config_selected_pipeline.get('feature_reference_csv',None)
                 self.hto_id                         = args.hto_ids if args.hto_ids else config_selected_pipeline.get('hto_id',None)
                 self.hto_names                      = args.hto_names if args.hto_names else config_selected_pipeline.get('hto_names',None)
-                if self.hto_names[0]                == 'Default' or None:
-                    self.hto_names                  = self.hto_id
+                if self.hto_names is not None:
+                    if self.hto_names[0]            == 'Default' or None:
+                        self.hto_names              = self.hto_id
                 self.hto_pattern                    = args.hto_pattern if args.hto_pattern else config_selected_pipeline.get('hto_pattern',None)
-                if self.hto_pattern[0]              == 'Default' or None:
-                    self.hto_pattern                = ['5PNNNNNNNNNN(BC)'] * len(self.hto_pattern)
+                if self.hto_pattern is not None:
+                    if self.hto_pattern[0]          == 'Default' or None:
+                        self.hto_pattern            = ['5PNNNNNNNNNN(BC)'] * len(self.hto_pattern)
                 self.hto_read                       = args.hto_reads if args.hto_reads else config_selected_pipeline.get('hto_read',None)
-                if self.hto_read[0]                 == 'Default' or None:
-                    self.hto_read                   = ['R2'] * len(self.hto_read)
+                if self.hto_read is not None:
+                    if self.hto_read[0]                 == 'Default' or None:
+                        self.hto_read                   = ['R2'] * len(self.hto_read)
                 self.hto_sequence                   = args.hto_sequence if args.hto_sequence else config_selected_pipeline.get('hto_sequence',None)
                 self.HTO_feature_type               = args.hto_feature_type if args.hto_feature_type else config_selected_pipeline.get('HTO_feature_type',None)
-                if self.HTO_feature_type[0]         == 'Default' or None:
-                    self.HTO_feature_type           = ['Antibody Capture'] * len(self.HTO_feature_type)
+                if self.HTO_feature_type is not None:
+                    if self.HTO_feature_type[0]         == 'Default' or None:
+                        self.HTO_feature_type           = ['Antibody Capture'] * len(self.HTO_feature_type)
                 self.feature_types                  = []
                 self.fastq_folder_path                     = []
                 feautre_type_list                   = ["gene expression","Antibody Capture","CRISPR Guide Capture","Multiplexing Capture","VDJ-B","VDJ-T","VDJ-T-GD","Antigen Capture #5' Antigen Capture only"]    
@@ -903,5 +907,5 @@ sh {make_multi_path}
     def velocyto(self):
         pass
     
-    def make_anndatas_for_vdj
-        
+    def make_anndatas_for_vdj(self):
+	    pass        
