@@ -13,7 +13,8 @@ parser.add_argument("--project-name", "--project_name", type=str, help="Project 
 parser.add_argument("--id", "--id", type=str, help="Project ID")
 parser.add_argument("--running-machine", "--running_machine", type=str, help="Running machine")
 parser.add_argument("--aligner-software-path", "--aligner_software_path", type=str, help="Aligner software path")
-parser.add_argument("--reference-genome", "--reference_genome", type=str, help="Reference genome")      
+parser.add_argument("--reference-genome", "--reference_genome", type=str, help="Reference genome")
+parser.add_argument("--aligner-ref-vdj-path", "--aligner_ref_vdj_path", type=str, help="Aligner VDJ reference genome path")      
 parser.add_argument("--cellbender-path", "--cellbender_path", type=str, help="Cellbender path")
 parser.add_argument("--jobs-number", "--jobs_number", type=int, help="number of jobs")
 parser.add_argument("--memory-size", "--memory_size", type=int, help="memory size") 
@@ -74,9 +75,11 @@ with open(CONFIG_GENERAL_PATH,'r') as f:
 
 if config['pipeline'] is not None:
     CONFIG_SELECTED_PIPELINE_PATH =             os.path.join(CONST_PATH, "config_" + config['pipeline'] + "_pipeline.yml")
-    
+
     with open(CONFIG_SELECTED_PIPELINE_PATH,'r') as g:
-        config_selected_pipeline =              yaml.safe_load(g) 
+        config_selected_pipeline =              yaml.safe_load(g)
+else :
+    config_selected_pipeline = {} 
 
 # Project building folders
 project_name =                              args.project_name if args.project_name else config['project_name']
