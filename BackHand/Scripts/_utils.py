@@ -72,9 +72,11 @@ CONFIG_GENERAL_PATH =                       os.path.join(CONST_PATH, "config_gen
 with open(CONFIG_GENERAL_PATH,'r') as f:
     config =                                yaml.safe_load(f)
 
-CONFIG_SELECTED_PIPELINE_PATH =             os.path.join(CONST_PATH, "config_" + config['pipeline'] + "_pipeline.yml")
-with open(CONFIG_SELECTED_PIPELINE_PATH,'r') as g:
-    config_selected_pipeline =              yaml.safe_load(g) 
+if config['pipeline'] is not None:
+    CONFIG_SELECTED_PIPELINE_PATH =             os.path.join(CONST_PATH, "config_" + config['pipeline'] + "_pipeline.yml")
+    
+    with open(CONFIG_SELECTED_PIPELINE_PATH,'r') as g:
+        config_selected_pipeline =              yaml.safe_load(g) 
 
 # Project building folders
 project_name =                              args.project_name if args.project_name else config['project_name']
