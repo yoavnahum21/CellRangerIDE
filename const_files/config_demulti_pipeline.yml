@@ -1,5 +1,4 @@
 adata_path:
-<<<<<<< HEAD
   - /home/labs/nyosef/yoavnah/CellRangerIDE/Projects/giaco/OutputFiles/Liver_1/outs/multi/count/raw_feature_bc_matrix.h5
 
 sample_names:
@@ -7,15 +6,6 @@ sample_names:
 
 hto_list_per_sample: # Pay attention that the lenght of the list compatible to the sample_name list
   - ['IKK_RORc_Ko_m1_median_lobe', 'IKK_RORc_KO_m1_left_lobe', 'IKK_RORc_KO_m2_median_lobe', 'IKK_RORc_KO_m2_left_lobe']
-=======
-  - /home/labs/nyosef/Collaboration/Liver/Liver_3/outs/multi/count/raw_feature_bc_matrix.h5
-
-sample_names:
-  - Liver_3
-
-hto_list_per_sample: # Pay attention that the lenght of the list compatible to the sample_name list
-  - ['IKK_m3_hilar_lymph_nodes', 'IKK_m4_hilar_lymph_nodes']
->>>>>>> argparser
 
 demultiplex_method: demultiplex2 # hashsolo or demultiplex2
 
